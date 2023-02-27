@@ -1,0 +1,16 @@
+C:\Users\amsad\source\repos\TestGif\obj\Debug\netcoreapp3.1\TestGif.csproj.AssemblyReference.cache
+C:\Users\amsad\source\repos\TestGif\obj\Debug\netcoreapp3.1\TestGif.Form1.resources
+C:\Users\amsad\source\repos\TestGif\obj\Debug\netcoreapp3.1\TestGif.csproj.GenerateResource.cache
+C:\Users\amsad\source\repos\TestGif\obj\Debug\netcoreapp3.1\TestGif.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\amsad\source\repos\TestGif\obj\Debug\netcoreapp3.1\TestGif.AssemblyInfoInputs.cache
+C:\Users\amsad\source\repos\TestGif\obj\Debug\netcoreapp3.1\TestGif.AssemblyInfo.cs
+C:\Users\amsad\source\repos\TestGif\obj\Debug\netcoreapp3.1\TestGif.csproj.CoreCompileInputs.cache
+C:\Users\amsad\source\repos\TestGif\bin\Debug\netcoreapp3.1\TestGif.exe
+C:\Users\amsad\source\repos\TestGif\bin\Debug\netcoreapp3.1\TestGif.deps.json
+C:\Users\amsad\source\repos\TestGif\bin\Debug\netcoreapp3.1\TestGif.runtimeconfig.json
+C:\Users\amsad\source\repos\TestGif\bin\Debug\netcoreapp3.1\TestGif.runtimeconfig.dev.json
+C:\Users\amsad\source\repos\TestGif\bin\Debug\netcoreapp3.1\TestGif.dll
+C:\Users\amsad\source\repos\TestGif\bin\Debug\netcoreapp3.1\TestGif.pdb
+C:\Users\amsad\source\repos\TestGif\obj\Debug\netcoreapp3.1\TestGif.dll
+C:\Users\amsad\source\repos\TestGif\obj\Debug\netcoreapp3.1\TestGif.pdb
+C:\Users\amsad\source\repos\TestGif\obj\Debug\netcoreapp3.1\TestGif.genruntimeconfig.cache
