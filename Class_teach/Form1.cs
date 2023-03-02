@@ -41,17 +41,17 @@ namespace Class_teach
         {
             if (e.Button == MouseButtons.Right)
             {
-                Men.new(null); count++;
-
-                this.Location = new Point(this.Location.X - 5, this.Location.Y - 5);
-                
+                Men newman =new Men(null);
+                newman.x = this.Location.X;
+                newman.y = this.Location.Y;
+                pop_base.Add(newman);
             }
         }
         private void Form1_Load(object sender, EventArgs e)
         {
             init_field();
-            Men new_man = new Men(null); // появился какой-то совершеннолетний тип случайного пола без фамилии
-            count++;
+            Men newman = new Men(null); // появился какой-то совершеннолетний тип случайного пола без фамилии
+            pop_base.Add(newman);
         }
         private void start_Click(object sender, EventArgs e)
         {
@@ -81,13 +81,16 @@ namespace Class_teach
 
         public class Family
         {
-            int R; // цвета семьи
-            int B;
-            int G;
-            static int count=0; // количество человек в семье
+            public int R; // цвета семьи
+            public int B;
+            public int G;
+            List<Men> members = new List<Men>(); // список членов семьи
 
-            public void New(Men Rod1,Men Rod2) //создаем новую семью
+            public Family(Men Rod1,Men Rod2) //создаем новую семью
             {
+                //добавляем в семью пару
+                if (Rod1 != null) if (members.Contains(Rod1) == false) members.Add(Rod1);
+                if (Rod2 != null) if (members.Contains(Rod2) == false) members.Add(Rod2);
                 using (GR = Graphics.FromImage(BM))
                 {
 
@@ -96,6 +99,12 @@ namespace Class_teach
                     GR.FillEllipse(fam_brush, 300, 240, 10, 10);
                 }
             }
+
+            public Family(Men Child) // добавляем в семью новорожденного
+            {
+                members.Add(Child);
+            }
+
             public void Dispose() // распад семьи
             {
 
@@ -107,32 +116,41 @@ namespace Class_teach
             bool sex;
             Family my_family;
             int age; // возраст
-            int x;   // координата X
-            int y;  // координата Y
+            public int x=300;   // координата X
+            public int y=240;  // координата Y
             int R;  // цвета индивида с рождения
             int B;
             int G;
             int force; //сила индивида
             int wel; //здоровье индивида
             int fert; //фертильность индивида
+            int Radius; //радиус
 
             public Men(Family new_fam)
             {
                 this.sex =  Convert.ToBoolean(rand1.Next(0, 1));
                 this.my_family = new_fam;
-                if (new_fam is null) this.age = 18; else this.age = 0;
-               
+                if (new_fam is null) { 
+                 this.age = 18; 
+                    R = rand1.Next(0, 255);
+                    B = rand1.Next(0, 255);
+                    G = rand1.Next(0, 255);
+                } else { 
+                    this.age = 0;
+                    R = new_fam.R;
+                    B = new_fam.B;
+                    G = new_fam.G;
+                }
+                if (age >= 10) Radius = 10; else Radius = 5;
 
                     //Graphics g = pictureBox1.CreateGraphics();
-
                     // Создаем объекты-кисти для закрашивания фигур
                     //Выбираем перо myPen желтого цвета толщиной в 1 пикселя:
                     //myGrid.Background = brush;
-                    Pen fam_pen = new Pen(Color.FromArgb(0, 0, 0), 1);
-
+                    //Pen fam_pen = new Pen(Color.FromArgb(0, 0, 0), 1);
                     // g.DrawEllipse(fam_pen, 300, 240, 10, 10); // окружностей
                     SolidBrush fam_brush = new SolidBrush(Color.Blue);
-                    GR.FillEllipse(fam_brush, 300, 240, 10, 10);
+                    GR.FillEllipse(fam_brush, x, y, Radius, Radius);
                 
             }
 
