@@ -22,62 +22,129 @@ namespace Class_teach
         public static Bitmap BM=null;
         List<Men> pop_base= new List<Men>();
         List<Family> fam_base = new List <Family>();
-        
+        public DataGridView DataGridView1 = new DataGridView();
+        public float FormWidth; //размер формы
+        public float FormHeight;
+        bool flag_life = false;
+        public int cellSizeX = 10; // размер клетки в пикселях по оси Х
+        public int cellSizeY; // размер клетки в пикселях по оси Y (считаем автомат. как 9:16)       
+        public int numCellX; //Кол-во клеток по горизонтали
+        public int numCellY; //Кол-во клеток по вертикали
+        public static int restFood=25; //% возобновляемость ресурсов в отсутствии человека
+        public Cell[] CellPole;
 
         public Form1()
         {
             InitializeComponent();
             GR = Graphics.FromHwnd(Handle);
-  
 
         }
 
         public void init_field()
         {
-            GR.Clear(Color.Green); 
+            FormWidth = Size.Width-100;//получаем размер формы - 100 пикселей на меню
+            FormHeight = Size.Height;
+            //Посчитаем количество клеток на поле
 
+            numCellX = (int)(FormWidth / cellSizeX);
+            cellSizeY= (int)(9 * cellSizeX / 16);
+            numCellY = (int)(FormHeight / cellSizeY);
+
+            CellPole = new Cell[numCellY * numCellX];
+            // Создадим массив для хранения состояния ячеек
+           
+            for(int j=0; j < numCellY; j++)
+            {
+                for(int i=0;i<numCellX; i++)
+                {
+                    CellPole[j * numCellX + i] = new Cell(null); // инициализация поля с кормом
+                    CellPole[j * numCellX + i].x = 100 + i*cellSizeX;
+                    CellPole[j * numCellX + i].y = j * cellSizeY;
+                    CellPole[j * numCellX + i].h = cellSizeY;
+                    CellPole[j * numCellX + i].w = cellSizeX;
+                }
+            }
+            //GR.Clear(Color.FromArgb(0,255,0)); 
         }
+
         private void Form1_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
             {
                 Men newman =new Men(null);
-                newman.x = this.Location.X;
-                newman.y = this.Location.Y;
+                newman.setXY(this.Location.X, this.Location.Y);
                 pop_base.Add(newman);
             }
         }
         private void Form1_Load(object sender, EventArgs e)
         {
-            init_field();
-            Men newman = new Men(null); // появился какой-то совершеннолетний тип случайного пола без фамилии
-            pop_base.Add(newman);
+
         }
-        private void start_Click(object sender, EventArgs e)
-        {
-            timer1.Start();
-            timer1.Interval = 1000; // 1 сек
+    
+        
+        private void Timer1_Start(object sender, EventArgs e)
+        {            
+
+
         }
 
-        private void stop_Click(object sender, EventArgs e)
+        private void Timer1_Stop(object sender, EventArgs e)
         {
             timer1.Stop();
         }
         private void timer1_Tick(object sender, EventArgs e)
         {
-            stop_Click(sender,e);
+            timer1.Stop();
             // Начинаем жить если ожидали таймера, если уже живем - то пропускаем тик.
            // if (flag_life is true) return; else flag_life = true;
             Do_Life();
-            start_Click(sender, e);
+            timer1.Start();
         }
         public void Do_Life()
         {
-            // нужно перебрать всех людей и сделать ими ход
-            //flag_life = false;
-            return;
+            // нужно перебрать все клетки с ресурсами и всех людей и сделать ими ход
+
+            //обновим клетки
+
+                for (int j = 0; j < numCellY*numCellX; j++)
+                {
+
+                        CellPole[j].ReDraw(); // Обновим клетку с кормом
+
+                }
+
+            
         }
 
+        public class Cell
+        {
+            public int food; //возобновляемый ресурс при отсутствии человека
+            public int x;
+            public int y;
+            public int w;
+            public int h;
+            public Men men=null; //ссылка на человека, изначально ни на что не ссылается
+            public Cell(Men men1)
+            {
+                men = men1;
+                food = 255; //изначальна клетка создается с кормом
+            }
+            public void ReDraw() //обновляем цвет ячейки в зависимости от food
+            {   // зеленый -белый(много/мало еды)
+                if (men == null && food < 255) // нет человека - запас еды восстанавливается
+                {
+                    food += restFood; if (food > 255) food = 255;
+                }
+                else 
+                {
+                    food -= restFood; if (food < 0) food = 0;
+                }
+
+                SolidBrush myCellColor = new SolidBrush(Color.FromArgb(255 - food, 255, 255 - food));
+                GR.FillRectangle(myCellColor, x, y, w, h);
+
+            }
+        }
 
         public class Family
         {
@@ -116,8 +183,8 @@ namespace Class_teach
             bool sex;
             Family my_family;
             int age; // возраст
-            public int x=300;   // координата X
-            public int y=240;  // координата Y
+            private int x=300;   // координата X
+            private int y=240;  // координата Y
             int R;  // цвета индивида с рождения
             int B;
             int G;
@@ -126,6 +193,12 @@ namespace Class_teach
             int fert; //фертильность индивида
             int Radius; //радиус
 
+            public void setXY(int xx, int yy)
+            {
+                x = xx; y = yy;
+            }
+            public int getX(){ return x; }
+            public int getY() { return y; }
             public Men(Family new_fam)
             {
                 this.sex =  Convert.ToBoolean(rand1.Next(0, 1));
@@ -151,12 +224,22 @@ namespace Class_teach
                     // g.DrawEllipse(fam_pen, 300, 240, 10, 10); // окружностей
                     SolidBrush fam_brush = new SolidBrush(Color.Blue);
                     GR.FillEllipse(fam_brush, x, y, Radius, Radius);
-                
+               
             }
 
         }
 
+        private void start_btn_Click(object sender, EventArgs e)
+        {
+            init_field();
+            flag_life = true;
+            timer1.Tick += new EventHandler(timer1_Tick); // Every time timer ticks, timer_Tick will be called
+            timer1.Interval = 1000; // 1 сек
+            timer1.Start();
 
+            Men newman = new Men(null); // появился какой-то совершеннолетний тип случайного пола без фамилии
+            pop_base.Add(newman);
+        }
     }
 }
 // Закрашиваем фигуры

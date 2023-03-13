@@ -31,6 +31,7 @@ namespace Class_teach
         {
             this.individ_count_label = new System.Windows.Forms.Label();
             this.family_count_label = new System.Windows.Forms.Label();
+            this.start_btn = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // individ_count_label
@@ -51,11 +52,22 @@ namespace Class_teach
             this.family_count_label.TabIndex = 3;
             this.family_count_label.Text = "Семей:";
             // 
+            // start_btn
+            // 
+            this.start_btn.Location = new System.Drawing.Point(13, 103);
+            this.start_btn.Name = "start_btn";
+            this.start_btn.Size = new System.Drawing.Size(75, 23);
+            this.start_btn.TabIndex = 4;
+            this.start_btn.Text = "Начать";
+            this.start_btn.UseVisualStyleBackColor = true;
+            this.start_btn.Click += new System.EventHandler(this.start_btn_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1784, 961);
+            this.Controls.Add(this.start_btn);
             this.Controls.Add(this.family_count_label);
             this.Controls.Add(this.individ_count_label);
             this.Name = "Form1";
@@ -70,6 +82,7 @@ namespace Class_teach
         #endregion
         private System.Windows.Forms.Label individ_count_label;
         private System.Windows.Forms.Label family_count_label;
+        private System.Windows.Forms.Button start_btn;
     }
 }
 
