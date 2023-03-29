@@ -1,0 +1,16 @@
+C:\Users\USR\Documents\GitHub\Life\Life_02\bin\Debug\Life_02.exe.config
+C:\Users\USR\Documents\GitHub\Life\Life_02\bin\Debug\Life_02.exe
+C:\Users\USR\Documents\GitHub\Life\Life_02\bin\Debug\Life_02.pdb
+C:\Users\USR\Documents\GitHub\Life\Life_02\obj\Debug\Life_02.csproj.AssemblyReference.cache
+C:\Users\USR\Documents\GitHub\Life\Life_02\obj\Debug\Life_02.csproj.SuggestedBindingRedirects.cache
+C:\Users\USR\Documents\GitHub\Life\Life_02\obj\Debug\MainWindow.g.cs
+C:\Users\USR\Documents\GitHub\Life\Life_02\obj\Debug\App.g.cs
+C:\Users\USR\Documents\GitHub\Life\Life_02\obj\Debug\Life_02_MarkupCompile.cache
+C:\Users\USR\Documents\GitHub\Life\Life_02\obj\Debug\Life_02_MarkupCompile.lref
+C:\Users\USR\Documents\GitHub\Life\Life_02\obj\Debug\MainWindow.baml
+C:\Users\USR\Documents\GitHub\Life\Life_02\obj\Debug\Life_02.g.resources
+C:\Users\USR\Documents\GitHub\Life\Life_02\obj\Debug\Life_02.Properties.Resources.resources
+C:\Users\USR\Documents\GitHub\Life\Life_02\obj\Debug\Life_02.csproj.GenerateResource.cache
+C:\Users\USR\Documents\GitHub\Life\Life_02\obj\Debug\Life_02.csproj.CoreCompileInputs.cache
+C:\Users\USR\Documents\GitHub\Life\Life_02\obj\Debug\Life_02.exe
+C:\Users\USR\Documents\GitHub\Life\Life_02\obj\Debug\Life_02.pdb

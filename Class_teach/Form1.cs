@@ -19,14 +19,16 @@ namespace Class_teach
         public static Random rand1 = new Random(1);
         public static Graphics GR = null;
         public static Bitmap BM = null;
-        public static List <Men> people = new List<Men>();
-        public static List<Family> fam_base = new List<Family>();
+        public static List <Men> people = new List<Men>(); // список всех живых людей
+        public static List <Men> deadMens=new List<Men>(); // список покойников, обновляется каждый ход
+
+        public static List<Family> fam_base = new List<Family>(); //список всех семей
 
         public static List<Cell> FreeCells = new List<Cell>(); // Список пустых клеток
         public static List<Cell> OccupyCells = new List<Cell>();//Список занятых клеток
 
-        public DataGridView DataGridView1 = new DataGridView();
-        public static int panel_width = 100;
+        //public DataGridView DataGridView1 = new DataGridView();
+        public static int panel_width = 100; // ширина информ-панели слева экрана
         public static bool flag_life = false;//Флаг, где true- идет жизнь, false - ждем таймера
         public static int cellSizeX = 100; // размер клетки в пикселях по оси Х
         public static int cellSizeY; // размер клетки в пикселях по оси Y (считаем автомат. как 9:16)       
@@ -110,6 +112,12 @@ namespace Class_teach
             {
                 pole.moveMen(person);
             }
+            //удаляем почивших людей из списка
+            foreach(var person in deadMens)
+            { 
+                pole.deadMan(person);
+            }
+            deadMens.Clear(); // уже обработали всех жмуров. очищаем список
             foreach (var cell in FreeCells)
             {
                 cell.reDrawCell();
@@ -154,7 +162,7 @@ namespace Class_teach
                 Cell oldCell = person.Cell;
 
                 if (person.age >= MAX_AGE)  // умер по возрасту
-                { deadMan(person); setFreeCell(oldCell); return; }
+                { deadMens.Add(person); setFreeCell(oldCell); return; }
 
 
                 newCell = lookAroundSingle(oldCell); //осмотрим все соседние клетки и получим выбор
@@ -165,7 +173,7 @@ namespace Class_teach
                 }
                 else //умер. нужно убрать его из семьи и из списков всех родственников
                 {
-                    deadMan(person); setFreeCell(oldCell);
+                    deadMens.Add(person); setFreeCell(oldCell);
                 }
 
             }
@@ -660,7 +668,7 @@ namespace Class_teach
             people.Add(newman);
             flag_life = true;
             timer1.Tick += new EventHandler(timer1_Tick); // Every time timer ticks, timer_Tick will be called
-            timer1.Interval = 1000; // 1 сек
+            timer1.Interval = 100; // 1 сек
             timer1.Start();
         }
     }
