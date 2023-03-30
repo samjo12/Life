@@ -38,6 +38,14 @@ namespace Class_teach
         public static int windowLeft;//координаты формы по X
 
         public static Pole pole; //поле клеток
+        public static int statAgeInfants = 0;
+        public static int statAgeTeens = 0;
+        public static int statAgeAdults = 0;
+        public static int statAgeOldmans = 0;
+        public static int statFams = 0;
+        public static int statBattles = 0;
+        public static int statKills = 0;
+        public static int statDeath = 0;
     // КОНСТАНТЫ
         public const int MAX_AGE = 100; //100 ходов жизни на индивида
         public const int AgeInfant = 10;
@@ -111,17 +119,33 @@ namespace Class_teach
             foreach (var person in people)
             {
                 pole.moveMen(person);
+                person.Stat();
             }
             //удаляем почивших людей из списка
             foreach(var person in deadMens)
             { 
                 pole.deadMan(person);
+                person.Stat(person.age);
             }
             deadMens.Clear(); // уже обработали всех жмуров. очищаем список
             foreach (var cell in FreeCells)
             {
                 cell.reDrawCell();
             }
+            Do_Stat(); //обновляем статистику на инфопанели слева
+
+        }
+        public void Do_Stat() //обновляем статистику на textbox
+        {
+            tbPeople.Text = Convert.ToString(people.Count);
+            tbStatInfants.Text= Convert.ToString(statAgeInfants);
+            tbStatTeens.Text = Convert.ToString(statAgeTeens);
+            tbStatAdults.Text = Convert.ToString(statAgeAdults);
+            tbStatOldMans.Text = Convert.ToString(statAgeOldmans);
+            tbStatFam.Text = Convert.ToString(fam_base.Count);
+            tbStatBattles.Text = Convert.ToString(statBattles);
+            tbStatDeath.Text = Convert.ToString(statDeath);
+            tbStatKills.Text = Convert.ToString(statKills);
 
         }
         public class Pole
@@ -165,7 +189,7 @@ namespace Class_teach
                 { deadMens.Add(person); setFreeCell(oldCell); return; }
 
 
-                newCell = lookAroundSingle(oldCell); //осмотрим все соседние клетки и получим выбор
+                newCell = lookAround(oldCell); //осмотрим все соседние клетки и получим выбор
                 if (newCell != null)// получили новую клетку для хода
                 {
                     setFreeCell(oldCell);
@@ -185,6 +209,7 @@ namespace Class_teach
                         r.relatives.Remove(men);
                 if (men.myFamily != null) //удаляем покойного из членов семьи к которой он принадлежал
                     men.myFamily.RemoveFromFamily(men,men.myFamily);
+                
                 men.deadTime(); // удаляем все данные по покойному из его экземпляра класса Men
                 people.Remove(men);
             }
@@ -221,7 +246,7 @@ namespace Class_teach
                 FreeCells.RemoveAt(c);
                 return freecell;
             }
-            public Cell lookAroundSingle(Cell currentCell)
+            public Cell lookAround(Cell currentCell)
             {   
                 Cell newCell=null; 
                 int i = currentCell.i;
@@ -530,7 +555,7 @@ namespace Class_teach
             public bool sex { get; private set; } //True-Female, False-Male
             public Family myFamily { get; set; }
             public List<Men> relatives { get; set; }
-            public int age { get; set; } // возраст
+            public int age { get; protected set; } // возраст
             private Cell myCell; //ссылка на клетку своего местонаходжения
             public Cell Cell
             {
@@ -554,6 +579,7 @@ namespace Class_teach
                 myCell =pole.getFreeCell();
                 randMenParams();
                 age = 18;
+                statAgeAdults++;
 
                 paintMen(); 
             }
@@ -567,7 +593,7 @@ namespace Class_teach
                 G = rand1.Next(0, 255);
                 randMenParams();
                 age = 18;
-
+                statAgeAdults++;
                 paintMen();
             }
             private void randMenParams()
@@ -614,11 +640,11 @@ namespace Class_teach
             {
                 
                 int center5=(int)(cellSizeX/20); //10%
-                int Radius=cellSizeX;
+                int Radius=cellSizeX - center5 * 2;
                 bool DrawOrFill; // Draw - false ; Fill-true
                 if (age < AgeInfant) { Radius = (int)cellSizeX / 8; DrawOrFill = false; }
                 else if (age < AgeAdult) { Radius = (int)cellSizeX / 2; DrawOrFill = false; }
-                else if (age < AgeOldman) { Radius = Radius - center5*2;  DrawOrFill = true; }
+                else if (age < AgeOldman) {  DrawOrFill = true; }
                 else { DrawOrFill = false; }
 
 
@@ -633,6 +659,33 @@ namespace Class_teach
                     Pen fam_pen = new Pen(Color.FromArgb(R, B, G));
                     GR.DrawEllipse(fam_pen, myCell.x+center5, myCell.y+center5, Radius, Radius);
 
+                }
+
+            }
+            public void Stat(int ageDeath=0) //0-человек жив, иначе - возраст смерти
+            {   // функция запускается каждый ход. Увеличивает Возраст 
+                // дополняются статистические списки
+                if(ageDeath!=0)
+                {
+                    if (ageDeath < AgeInfant) statAgeInfants--;
+                    else if(ageDeath<AgeAdult)statAgeTeens--;
+                    else if(ageDeath<AgeOldman)statAgeAdults--;
+                    else if(ageDeath<MAX_AGE)statAgeOldmans--;
+                    statDeath++; 
+                    return;
+                }
+                
+                age++;
+                switch(age)
+                {
+                    case AgeInfant: statAgeInfants--; statAgeTeens++;
+                        break;
+                    case AgeAdult: statAgeTeens--; statAgeAdults++;
+                        break;
+                    case AgeOldman: statAgeAdults--; statAgeOldmans++;
+                        break;
+                    case MAX_AGE: statAgeOldmans--; 
+                        break;
                 }
 
             }
@@ -663,14 +716,17 @@ namespace Class_teach
         private void start_btn_Click(object sender, EventArgs e)
         {
             init_field();
-
-            Men newman = new Men(); // появился какой-то совершеннолетний тип случайного пола без фамилии
-            people.Add(newman);
+            for (int i = 0; i < nudPeople.Value; i++)
+            {
+                Men newman = new Men(); // появился какой-то совершеннолетний 
+                people.Add(newman);     // случайного пола без фамилии
+            }
             flag_life = true;
             timer1.Tick += new EventHandler(timer1_Tick); // Every time timer ticks, timer_Tick will be called
-            timer1.Interval = 100; // 1 сек
+            timer1.Interval = 100; // 0.1 сек
             timer1.Start();
         }
+
     }
 }
 
