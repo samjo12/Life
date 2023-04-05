@@ -59,7 +59,7 @@ namespace Class_teach
             // individ_count_label
             // 
             this.individ_count_label.AutoSize = true;
-            this.individ_count_label.Location = new System.Drawing.Point(7, 270);
+            this.individ_count_label.Location = new System.Drawing.Point(7, 266);
             this.individ_count_label.Name = "individ_count_label";
             this.individ_count_label.Size = new System.Drawing.Size(71, 15);
             this.individ_count_label.TabIndex = 2;
@@ -86,7 +86,7 @@ namespace Class_teach
             // 
             // tbPeople
             // 
-            this.tbPeople.Location = new System.Drawing.Point(7, 287);
+            this.tbPeople.Location = new System.Drawing.Point(7, 283);
             this.tbPeople.Name = "tbPeople";
             this.tbPeople.Size = new System.Drawing.Size(71, 23);
             this.tbPeople.TabIndex = 5;
