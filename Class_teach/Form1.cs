@@ -51,7 +51,7 @@ namespace Class_teach
         public static int statKills = 0;
         public static int statDeath = 0;
     // КОНСТАНТЫ
-        public const int MAX_AGE = 1000; //100 ходов жизни на индивида
+        public const int MAX_AGE = 800; //100 ходов жизни на индивида
 
         public const int AgeInfant = MAX_AGE/10;
         public const int AgeAdult = MAX_AGE * 18/100;
@@ -59,7 +59,7 @@ namespace Class_teach
         
         public const int MAX_CELL_FOOD = 255; // максимальное значение еды в клетке
         public const int REST_CELL_FOOD = 16; //51 из 255 (20%)возобновляемость ресурсов в пустой клетке 
-        public const int DEC_CELL_FOOD = REST_CELL_FOOD * 3;
+        public const int DEC_CELL_FOOD = REST_CELL_FOOD * 1;
         public const int FAMILY_MAX_COUNT= 2; //максимальное количество взрослых членов в семье
         public const bool MALE = false;
         public const bool FEMALE = true;
