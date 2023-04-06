@@ -623,9 +623,9 @@ namespace Class_teach
             protected int forceBorn; //сила с рождения 
             public int health { get; private set; }//текущее здоровье индивида
             protected int healthBorn; //здоровье индивила с рождения
-            public int fert { get; private set; }//фертильность индивида
-
-            public Men(Cell cell, Family family=null)
+            public int fert { get; private set; }//фертильность индивида кол-во детей которое он может произвести
+            protected int fertBorn{ get; private set; }//наследственная плодовитость
+        public Men(Cell cell, Family family=null)
             {
                 myFamily = family;
                 relatives = new List<Men>(); //создаем список родственников
@@ -663,11 +663,14 @@ namespace Class_teach
                         }
                         relatives.Add(m); //создаем список родственников из всех членов семьи
                     }
-                    forceBorn = (int)(force / AdultMembers + (rand1.Next(-1, 2) * rand1.Next(1, 10)));
-                    healthBorn = (int)(health / AdultMembers + (rand1.Next(-1, 2) * rand1.Next(1, 10)));
-                    health = healthBorn;
+                    forceBorn = (int)((force / AdultMembers)*(1+ rand1.Next(-1, 2)/10)); //+- 10% от среднего 
+                    healthBorn = (int)((health / AdultMembers)*(1+ rand1.Next(-1, 2)/10));//значения в семье
+                    fertBorn = (int)((fert / AdultMembers)*(1 + rand1.Next(-1, 2)/10));
+                    
                     force = forceBorn;
-                    fert = (int)(fert / AdultMembers + (rand1.Next(-1, 2) * rand1.Next(1, 10)));
+                    health = healthBorn;
+                    fert = fertBorn;
+
                     statAgeInfants++;
                 }
                 paintMen();
@@ -679,10 +682,11 @@ namespace Class_teach
                 else if (sex == FEMALE) statFemales++; else statError = "MAFE3";
                 forceBorn = rand1.Next(10, 128); //сила от 10 до 128
                 healthBorn = rand1.Next(64, 255);  //здоровье задается от макс 255 до четверти 64
-                fert = rand1.Next(0,10); //плодовитость. Каждый ход семейные пары при наличии достаточн. кол-ва еды
+                fertBorn = rand1.Next(0,6); //плодовитость. Каждый ход семейные пары при наличии достаточн. кол-ва еды
                 //могут произвести ребенка с вероятностью rod1.fert&rod2.fert
                 health = healthBorn;
                 force = forceBorn;
+                fert = fertBorn; //кол-во детей которое осталось/возможно произвести
             }
 
 
@@ -749,16 +753,56 @@ namespace Class_teach
             internal void HealthUp()
             {
                 if (health >= healthBorn) return; // со здоровьем все в порядке
+
                 int healthUp=(int)(healthBorn*10/100); //восстанавливается за 10% за ход
                 health += healthUp;
             }
             internal bool HealthDown(int percent)
             {
-                int healthDown = (int)(healthBorn*percent / 100);
+                int healthDown;
+                int currentPercent = 100 * health / healthBorn; //текущий процент здоровья
+                // введем прогрессивную шкалу снижения здоровья
+                if (currentPercent > 50) healthDown = healthBorn * 20 / 100; // -20%
+                else if (currentPercent > 25) healthDown = healthBorn * 10 / 100;//-10%
+                else if (currentPercent > 10) healthDown = healthBorn / 100; //-1%
+                else healthDown = 0; //меньше минимума не падает сила
+                force -= healthDown;
+                //int healthDown = (int)(healthBorn*percent / 100);
                 // индивид ухудшает свое здоровье голодовкой или дракой
-                if (health < healthDown) return true; //умер
+                if (health < healthDown) { health -= healthDown;  return true; } //умер
                 else health -= healthDown;
                 return false; // живой :)
+            }
+            internal void ForceUp(int newValue=0) //новое значение
+            {  //сила растет после успешной драки, или если newvalue=0 (еды много) , то растет на 1% от forceBorn
+                if (newValue != 0) { force = newValue; return; }
+                //просто восстанавливаем силу за счет еды 
+                int forceUp;
+                int currentPercent = 100 * force / forceBorn; //текущий процент силы
+                // введем прогрессивную шкалу восстановления силы
+                if (currentPercent > 50) forceUp = forceBorn / 100; // +1%
+                else if (currentPercent > 25) forceUp = forceBorn * 10 / 100;//+10%
+                else if (currentPercent > 10) forceUp = forceBorn * 15 / 100; //+15%
+                else forceUp = forceBorn * 20 / 100; //+20% //меньше минимума не падает сила
+                force += forceUp;
+                if(force>forceBorn)force=forceBorn;
+            }
+            internal void ForceDown(int value=0)
+            {   //сила снижается от голода
+                if (value != 0) // это снижение на определенную величину по требованию
+                { 
+                    if (force > value)force -= value;
+                    else force = forceBorn*10/100; 
+                    return; 
+                }
+                int forceDown;
+                int currentPercent = 100 * force / forceBorn; //текущий процент силы
+                // введем прогрессивную шкалу падения силы
+                if (currentPercent > 50) forceDown = forceBorn * 20 / 100; // -20%
+                else if (currentPercent > 25) forceDown = forceBorn * 10 / 100;//-10%
+                else if (currentPercent > 10) forceDown = forceBorn / 100; //-1%
+                else forceDown=0; //меньше минимума не падает сила
+                force -= forceDown;
             }
         } // end for class Men
 
@@ -775,7 +819,7 @@ namespace Class_teach
             }
             flag_life = true;
             timer1.Tick += new EventHandler(timer1_Tick); // Every time timer ticks, timer_Tick will be called
-            timer1.Interval = 100; // 0.1 сек
+            timer1.Interval = 10; // 0.1 сек
             timer1.Start();
         }
 
