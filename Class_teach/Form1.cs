@@ -9,6 +9,7 @@ using System.Text;
 //using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.AxHost;
 
 
 namespace Class_teach
@@ -19,8 +20,8 @@ namespace Class_teach
         public static Random rand1 = new Random();
         public static Graphics GR = null;
         public static Bitmap BM = null;
-        public static List <Men> people = new List<Men>(); // список всех живых людей
-        public static List <Men> deadMens=new List<Men>(); // список покойников, обновляется каждый ход
+        public static List<Men> people = new List<Men>(); // список всех живых людей
+        public static List<Men> deadMens = new List<Men>(); // список покойников, обновляется каждый ход
         public static List<Men> newBorns = new List<Men>(); // список новорожденных
 
         public static List<Family> fam_base = new List<Family>(); //список всех семей
@@ -38,10 +39,10 @@ namespace Class_teach
         public static int windowTop; //координаты формы Y
         public static int windowLeft;//координаты формы по X
 
-        public static Pole pole; //поле клеток
+        public static Pole pole = null; //поле клеток
         public static int statMales = 0;
         public static int statFemales = 0;
-        public static string statError="";
+        public static string statError = "";
         public static int statAgeInfants = 0;
         public static int statAgeTeens = 0;
         public static int statAgeAdults = 0;
@@ -50,17 +51,17 @@ namespace Class_teach
         public static int statBattles = 0;
         public static int statKills = 0;
         public static int statDeath = 0;
-    // КОНСТАНТЫ
+        // КОНСТАНТЫ
         public const int MAX_AGE = 800; //100 ходов жизни на индивида
 
-        public const int AgeInfant = MAX_AGE/10;
-        public const int AgeAdult = MAX_AGE * 18/100;
+        public const int AgeInfant = MAX_AGE / 10;
+        public const int AgeAdult = MAX_AGE * 18 / 100;
         public const int AgeOldman = MAX_AGE * 65 / 100;
-        
+
         public const int MAX_CELL_FOOD = 255; // максимальное значение еды в клетке
         public const int REST_CELL_FOOD = 16; //51 из 255 (20%)возобновляемость ресурсов в пустой клетке 
         public const int DEC_CELL_FOOD = REST_CELL_FOOD * 1;
-        public const int FAMILY_MAX_COUNT= 2; //максимальное количество взрослых членов в семье
+        public const int FAMILY_MAX_COUNT = 2; //максимальное количество взрослых членов в семье
         public const bool MALE = false;
         public const bool FEMALE = true;
 
@@ -81,7 +82,8 @@ namespace Class_teach
         }
 
         private void Form1_MouseDown(object sender, MouseEventArgs e)
-        { Men newman;
+        {
+            Men newman;
             Cell newCell;
             if (e.Button == MouseButtons.Right)
             {
@@ -90,7 +92,7 @@ namespace Class_teach
                 else
                 {
                     newman = new Men(newCell); // создаем человека и приписываем его к ячейке
-                    newCell.Man=newman; //записываем в ячейку ссылку на человека
+                    newCell.Man = newman; //записываем в ячейку ссылку на человека
                     people.Add(newman);
                 }
             }
@@ -109,40 +111,47 @@ namespace Class_teach
         {
             // Переберем всех людей и сделать ими ход
             // нужно перебрать все пустые клетки с неполным ресурсом food
-            for(int i=0; i<people.Count;i++)
+            for (int i = 0; i < people.Count; i++)
             {
                 pole.moveMen(people.ElementAt(i));
                 people.ElementAt(i).Stat();
             }
-            /*foreach (var person in people)
-            {
-                pole.moveMen(person);
-                person.Stat();
-            }*/
             //удаляем почивших людей из списка
-            foreach(var person in deadMens)
-            { 
+            foreach (var person in deadMens)
+            {
                 pole.deadMan(person);
                 if (person.sex == MALE) statMales--; else statFemales--;
                 person.Stat(person.age);
+                people.Remove(person);
             }
             deadMens.Clear(); // уже обработали всех жмуров. очищаем список
             // добавляем новорожденных
-            foreach(var person in newBorns)
+            foreach (var person in newBorns)
                 people.Add(person);     // добавляем в список людей
 
             newBorns.Clear(); // уже обработали всех новорожденных. очищаем список
             // обрабатываем пустые ячейки. корм растет 
             foreach (var cell in FreeCells)
-                cell.reDrawCell();
+                if (cell.food < MAX_CELL_FOOD) cell.reDrawCell();
             Do_Stat(); //обновляем статистику на инфопанели слева
 
         }
-        public void Do_Stat() //обновляем статистику на textbox
+        public void Do_Stat(bool start = false) //обновляем статистику на textbox
         {
-            tbPeople.Text = Convert.ToString(people.Count)+" = "+ statError+
-                Convert.ToString(statMales)+" + "+ Convert.ToString(statFemales);
-            tbStatInfants.Text= Convert.ToString(statAgeInfants);
+            /*if(start==true)
+            {
+                statAgeInfants = 0;
+                statAgeTeens = 0;
+                statAgeAdults = 0;
+                statAgeOldmans = 0;
+                statBattles = 0;
+                statDeath = 0;
+                statKills = 0;
+            }
+            */
+            tbPeople.Text = Convert.ToString(people.Count) + " = " + statError +
+                Convert.ToString(statMales) + " + " + Convert.ToString(statFemales);
+            tbStatInfants.Text = Convert.ToString(statAgeInfants);
             tbStatTeens.Text = Convert.ToString(statAgeTeens);
             tbStatAdults.Text = Convert.ToString(statAgeAdults);
             tbStatOldMans.Text = Convert.ToString(statAgeOldmans);
@@ -169,7 +178,7 @@ namespace Class_teach
                 cellSizeY = cellSizeX;// (int)(9 * cellSizeX / 16);
                 numCellY = (int)(FormHeight / cellSizeY);
 
-                CellPole = new Cell [numCellX,numCellY];// Создадим массив для хранения состояния ячеек
+                CellPole = new Cell[numCellX, numCellY];// Создадим массив для хранения состояния ячеек
 
                 for (int j = 0; j < numCellY; j++)
                 {
@@ -177,9 +186,9 @@ namespace Class_teach
                     {
                         int X = panel_width + i * cellSizeX; //100+i*cellSizeX
                         int Y = j * cellSizeY;
-                        CellPole[i,j] = new Cell(X,Y, cellSizeX, cellSizeY);  //создадим пустые клетки с кормом
+                        CellPole[i, j] = new Cell(X, Y, cellSizeX, cellSizeY);  //создадим пустые клетки с кормом
                         CellPole[i, j].i = i; CellPole[i, j].j = j;
-                        FreeCells.Add(CellPole[i,j]); //записываем в список свободных ячеек
+                        FreeCells.Add(CellPole[i, j]); //записываем в список свободных ячеек
                     }
                 }
             }
@@ -210,12 +219,12 @@ namespace Class_teach
 
             internal void deadMan(Men men)
             {
-                if(men.relatives.Count>0) //удаляем покойного из списка родни всех его родственников
-                    foreach(var r in men.relatives)
-                        if(r.relatives!=null)r.relatives.Remove(men);
+                if (men.relatives.Count > 0) //удаляем покойного из списка родни всех его родственников
+                    foreach (var r in men.relatives)
+                        if (r.relatives != null) r.relatives.Remove(men);
                 if (men.myFamily != null) //удаляем покойного из членов семьи к которой он принадлежал
-                    men.myFamily.RemoveFromFamily(men,men.myFamily);
-                
+                    men.myFamily.RemoveFromFamily(men, men.myFamily);
+
                 men.deadTime(); // удаляем все данные по покойному из его экземпляра класса Men
                 people.Remove(men);
             }
@@ -223,7 +232,7 @@ namespace Class_teach
             public Cell getFreeCellFamily(Family fam)
             {   // возвращаем свободную ячейку расположенную рядом с членами семьи
                 // или если все заняты - возвращаем null
-                
+
                 return null;
             }
 
@@ -254,7 +263,7 @@ namespace Class_teach
             }
             public Cell lookAround(Cell currentCell)
             {    // возвращаем null если человек умрет
-                Cell newCell=null; 
+                Cell newCell = null;
                 int i = currentCell.i;
                 int j = currentCell.j;
 
@@ -274,14 +283,14 @@ namespace Class_teach
                 if (i > 0) { iac.Add(i - 1); jac.Add(j); } //Left 0
                 if (i > 0 && j > 0) { iac.Add(i - 1); jac.Add(j - 1); } //UP&LEFT 1
                 if (j > 0) { iac.Add(i); jac.Add(j - 1); }//UP 2
-                if (i < numCellX - 1 && j > 0) { iac.Add(i+1); jac.Add(j - 1); }//UP&Right 3
+                if (i < numCellX - 1 && j > 0) { iac.Add(i + 1); jac.Add(j - 1); }//UP&Right 3
                 if (i < numCellX - 1) { iac.Add(i + 1); jac.Add(j); }//Right 4
-                if (i < numCellX - 1 && j < numCellY - 1) { iac.Add(i + 1); jac.Add(j+1); }//Right & DOWN 5
+                if (i < numCellX - 1 && j < numCellY - 1) { iac.Add(i + 1); jac.Add(j + 1); }//Right & DOWN 5
                 if (j < numCellY - 1) { iac.Add(i); jac.Add(j + 1); }//DOWN 6
                 if (i > 0 && j < numCellY - 1) { iac.Add(i - 1); jac.Add(j + 1); }//Left & DOWN 7
 
-                
-                for (ind=0; ind < iac.Count; ind++)// посмотрим на все соседние ячейки
+
+                for (ind = 0; ind < iac.Count; ind++)// посмотрим на все соседние ячейки
                 {
                     if (CellPole[iac[ind], jac[ind]].Man != null) //соседняя ячейка занята человеком
                     {
@@ -290,22 +299,22 @@ namespace Class_teach
                         if (!currentCell.Man.relatives.Contains(CellPole[iac[ind], jac[ind]].Man))
                         { //нашли рядом НЕродственника
                             AC_NonFamily.Add(CellPole[iac[ind], jac[ind]].Man);
-                            if(currentCell.Man.age>=AgeAdult && currentCell.Man.age<AgeOldman)//свой возраст>18?
-                            if (CellPole[iac[ind], jac[ind]].Man.age >= AgeAdult// проверка на возраст
-                                || CellPole[iac[ind], jac[ind]].Man.age < AgeOldman) //от 18 до OLDMAN
-                            {
-                                if (CellPole[iac[ind], jac[ind]].Man.myFamily == null)//встретили несемейного
-                                { // без своей семьи
-                                    if (CellPole[iac[ind], jac[ind]].Man.sex != currentCell.Man.sex) //он еще и оказался свободным партнером
-                                        AC_SinglePartners.Add(CellPole[iac[ind], jac[ind]].Man); // противоположного пола
+                            if (currentCell.Man.age >= AgeAdult && currentCell.Man.age < AgeOldman)//свой возраст>18?
+                                if (CellPole[iac[ind], jac[ind]].Man.age >= AgeAdult// проверка на возраст
+                                    || CellPole[iac[ind], jac[ind]].Man.age < AgeOldman) //от 18 до OLDMAN
+                                {
+                                    if (CellPole[iac[ind], jac[ind]].Man.myFamily == null)//встретили несемейного
+                                    { // без своей семьи
+                                        if (CellPole[iac[ind], jac[ind]].Man.sex != currentCell.Man.sex) //он еще и оказался свободным партнером
+                                            AC_SinglePartners.Add(CellPole[iac[ind], jac[ind]].Man); // противоположного пола
+                                    }
                                 }
-                            }
                         }
                     }
                     else //соседняя ячейка свободна. Оценим ее ресурс
                     {
                         AC_moves.Add(CellPole[iac[ind], jac[ind]]);
-                        if(CellPole[iac[ind], jac[ind]].food==MAX_CELL_FOOD)
+                        if (CellPole[iac[ind], jac[ind]].food == MAX_CELL_FOOD)
                             AC_MaxFood.Add(CellPole[iac[ind], jac[ind]]);
                         else AC_SomeFood.Add(CellPole[iac[ind], jac[ind]]);
                     }
@@ -316,15 +325,15 @@ namespace Class_teach
                 // Сортируем его по параметрам fert и force и делаем лучший выбор. Ход при этом пропускается
                 // возвращается текущая клетка и создается новая семья
                 //...
-                if (currentCell.Man.age >= AgeAdult && currentCell.Man.age < AgeOldman)
+                if (currentCell.Man.age >= AgeAdult && currentCell.Man.age < AgeOldman) //взрослый не старый чел
                 {
-                    if (AC_SinglePartners.Count > 0) //нужно выбрать достойного партнера
+                    if (AC_SinglePartners.Count > 0) // вокруге есть одинокие возможные партнеры
                     {
-                        if (currentCell.Man.myFamily == null) // создадим семью?
-                        {
+                        if (currentCell.Man.myFamily == null) // до сих пор нет семьи? 
+                        {   //можно выбрать самого достойного партнера
                             Men partner = findBestPartner(AC_SinglePartners, currentCell);
                             if (partner != null)
-                            {
+                            {   // есть подходящий - создадим семью
                                 Family newFam = new Family(currentCell.Man, partner);
                                 fam_base.Add(newFam);
                                 currentCell.Man.myFamily = newFam;
@@ -333,26 +342,29 @@ namespace Class_teach
                             }
                         }
                         else if (currentCell.Man.myFamily.numAdultMembers < FAMILY_MAX_COUNT) //добавим нового члена в семью
-                        {
+                        {   // этот тот случай когда разрешена семья из 3х и более человек
                             Men partner = findBestPartner(AC_SinglePartners, currentCell);
                             if (partner != null)
                             {
                                 currentCell.Man.myFamily.AddToFamily(partner);
-                                partner.myFamily = currentCell.Man.myFamily; //берем в семью
+                                partner.myFamily = currentCell.Man.myFamily; //вступает в семью
                                 return currentCell; //ход окончен, остаемся на месте
                             }
                         }
                     }
 
-                    if (currentCell.Man.sex == FEMALE && currentCell.Man.myFamily != null && AC_moves.Count > 0)// замужняя женщина
+                    if (currentCell.Man.sex == FEMALE && currentCell.Man.myFamily != null
+                        && AC_moves.Count > 0 && currentCell.Man.fert > 0 && (rand1.Next(0, 2) == 0 ? false : true))
+                    // замужняя женщина желающая детей fert, ну иповезло ей немного 
                     {   // проверим достаток еды в семье. Среднее величина всех ресурсов клеток занимаемых семьей в расчете на
-                        // одного члена семьи должна быть более 50%
+                        // одного члена семьи должна быть более 75%
+
                         int wholeFood = 0;
                         foreach (var member in currentCell.Man.myFamily.members)
                         {
                             wholeFood += member.Cell.food;
                         }
-                        if (wholeFood / currentCell.Man.myFamily.members.Count > MAX_CELL_FOOD / 2)
+                        if (wholeFood / currentCell.Man.myFamily.members.Count > MAX_CELL_FOOD * 3 / 4)
                         {   // еды достаточно, с вероятностью fert в семье рождается ребенок и
                             // помещается на одну из клеток списка AC_moves
                             Cell childCell = AC_moves.ElementAt(rand1.Next(0, AC_moves.Count)); // находим место для ребенка
@@ -365,7 +377,8 @@ namespace Class_teach
                             FreeCells.Remove(childCell);
 
                             //newBorns.Add(newman);
-                            
+                            currentCell.Man.fertDown(); // уменьшаем число ожидаемых детей
+                            currentCell.Man.HealthDown(10); //уменьшается здоровье матери на 10%
                             return currentCell; //ход окончен, остаемся на месте
                         }
                     }
@@ -373,33 +386,33 @@ namespace Class_teach
 
                 //Оценим количество еды вокруг и 
                 // Если клеток с максимальным запасом еды несколько, то выберем направление случайно
-                if (AC_MaxFood.Count>0) return AC_MaxFood.ElementAt(rand1.Next(0, AC_MaxFood.Count-1));
+                if (AC_MaxFood.Count > 0) return AC_MaxFood.ElementAt(rand1.Next(0, AC_MaxFood.Count - 1));
                 else
                 {
                     if (AC_SomeFood.Count == 0) //похоже что еды вокруг совсем нет. 
                     {
                         if (currentCell.food == 0)  //в моей клетке тоже нет еды
-                        { 
-                            if(AC_NonFamily.Count()>0) // Если вокруг есть неродственники, то нападаем 
+                        {
+                            if (AC_NonFamily.Count() > 0) // Если вокруг есть неродственники, то нападаем 
                             {                         //на самого слабого, только если наша сила больше чем его
-                                //после боя, в случае победы переходим на клетку побежденного
-                        // Я голодный вокруг нет переспектив. Нужно напасть на НЕродственника
-                        // чтобы восстановить здоровье в случае победы lj 100% и прибавить силу+5% но не более 100%
-                        // к первоначальному ее количеству,
-                        
-                        // запуск боя и переход на клетку оппонента в случае выигрыша.
-                        // Battle(currentCell.Man, AC_NonFamily);
-                        // return;
+                                                      //после боя, в случае победы переходим на клетку побежденного
+                                                      // Я голодный вокруг нет переспектив. Нужно напасть на НЕродственника
+                                                      // чтобы восстановить здоровье в случае победы lj 100% и прибавить силу+5% но не более 100%
+                                                      // к первоначальному ее количеству,
+
+                                // запуск боя и переход на клетку оппонента в случае выигрыша.
+                                // Battle(currentCell.Man, AC_NonFamily);
+                                // return;
                             }
                             else
                             { // если неродственников нет , здоровье уменьшается -40%
                               // идти в случайном направлении.
-                                bool dead=currentCell.Man.HealthDown(40); //уменьшаем  здоровье на 40%
+                                bool dead = currentCell.Man.HealthDown(40); //уменьшаем  здоровье на 40%
                                 if (dead == true) //Чел умер от недоедания
-                                    return null; 
+                                    return null;
                                 if (AC_moves.Count > 0) return AC_moves.ElementAt(rand1.Next(0, AC_moves.Count));
                             }
-                       
+
                         }
                     }
                     else
@@ -410,15 +423,15 @@ namespace Class_teach
                         {
                             if (m.food > max_food) newCell = m;
                         }
-                        
+
                     }
-                  
+
                 }
-                
+
                 return newCell;
             }
 
-            private Men findBestPartner(List<Men> SinglePartners, Cell currentCell )
+            private Men findBestPartner(List<Men> SinglePartners, Cell currentCell)
             { //вернем null если нет подходящего партнера
                 bool sex = currentCell.Man.sex;
                 int currentFood = currentCell.food;
@@ -429,50 +442,51 @@ namespace Class_teach
                     if (partner == null) { partner = SinglePartners.First(); continue; }
                     if (sex == FEMALE)
                         if (p.force > partner.force) partner = p;
-                    else if (p.fert > partner.fert) partner = p;
+                        else if (p.fert > partner.fert) partner = p;
                 }
                 return partner;
             }
             public Cell getCell(int x, int y)
             {
-                return CellPole[x,y];
+                return CellPole[x, y];
             }
 
             public Cell setXY(int X, int Y) //возвращаем ячейку по координатам пикселя на экране
             {   //определим в какую ячейку мы попали
 
                 int i = 0, j;
-                int x1=-1, y1=-1; //координаты ячейки(по умолчанию -1 не попали ни в какую ячейку)
+                int x1 = -1, y1 = -1; //координаты ячейки(по умолчанию -1 не попали ни в какую ячейку)
                 for (j = 0; j < numCellY; j++)
                 {
 
-                    if (CellPole[i,j].y < Y && (CellPole[i,j].y+cellSizeY) > Y) 
-                    {   y1 = j; //нашли в j - номер строки
+                    if (CellPole[i, j].y < Y && (CellPole[i, j].y + cellSizeY) > Y)
+                    {
+                        y1 = j; //нашли в j - номер строки
                         for (i = 0; i < numCellX; i++)
                         {
-                            if (CellPole[i,j].x < X && (CellPole[i,j].x + cellSizeX) > X)
+                            if (CellPole[i, j].x < X && (CellPole[i, j].x + cellSizeX) > X)
                             { //нашли в i - номер столбца
                                 x1 = i;
-                                break; 
+                                break;
                             }
                         }
-                        break; 
-                    } 
+                        break;
+                    }
                 }
-                if (x1 == -1 || y1 == -1) 
+                if (x1 == -1 || y1 == -1)
                     return null; //попаданий в ячейки не было
-                if (OccupyCells.Contains(CellPole[x1,y1])) return null; //ячейка занята
+                if (OccupyCells.Contains(CellPole[x1, y1])) return null; //ячейка занята
                 else
                 {
-                    OccupyCells.Add(CellPole[x1,y1]);
-                    FreeCells.Remove(CellPole[x1,y1]);
-                    return CellPole[x1,y1]; // возвращаем ячейку с полученной координатой
+                    OccupyCells.Add(CellPole[x1, y1]);
+                    FreeCells.Remove(CellPole[x1, y1]);
+                    return CellPole[x1, y1]; // возвращаем ячейку с полученной координатой
                 }
-                    
+
             }
 
         }
-      
+
 
         public class Cell
         {
@@ -483,31 +497,33 @@ namespace Class_teach
             public int y { get; set; } //координата по Y
             public int w { get; set; } //ширина в пикселях
             public int h { get; set; } //высота в пикселях
-            public Men Man { get { return men; } 
-                             set { men = value; delayRestore = DELAY_CELL_RESTORE;  reDrawCell(); } 
-                           }
+            public Men Man
+            {
+                get { return men; }
+                set { men = value; delayRestore = DELAY_CELL_RESTORE; reDrawCell(); }
+            }
             private Men men;
             int delayRestore; //задержка восстановления значения food
 
             public Cell(int X, int Y, int W, int H) //создается пустая ячейка с кормом
-            {                
+            {
                 x = X; y = Y; h = H; w = W;
                 food = MAX_CELL_FOOD;
                 men = null; //ссылка на человека, изначально ни на что не ссылается}
                 PaintCell(); //перерисуем клетку
                 delayRestore = 0; //задержки восстановления нет
             }
-            
+
             public void reDrawCell()//обновляем цвет ячейки в зависимости от food
             {   // зеленый -белый(много/мало еды)
- 
+
                 // перерасчет food
                 if (men == null) // клетка пуста
                 {
                     if (delayRestore == 0) //задержки нет
                     {
-                        if (food < MAX_CELL_FOOD) 
-                            food += REST_CELL_FOOD; 
+                        if (food < MAX_CELL_FOOD)
+                            food += REST_CELL_FOOD;
                         if (food > MAX_CELL_FOOD) food = MAX_CELL_FOOD;
                         delayRestore = DELAY_CELL_RESTORE;
                     }
@@ -519,12 +535,12 @@ namespace Class_teach
                     if (food > 0)
                     { //еды становиться меньше
                         if (men.age < AgeAdult || men.age > AgeOldman) food -= DEC_CELL_FOOD;
-                        else food -= DEC_CELL_FOOD*2;
+                        else food -= DEC_CELL_FOOD * 2;
                     }
                     if (food < 0) food = 0; //еды становиться меньше
                 }
-                    PaintCell(); //перерисуем клетку
-                    if(men!=null)men.paintMen(); //перерисуем жителя если он находится в клетке
+                PaintCell(); //перерисуем клетку
+                if (men != null) men.paintMen(); //перерисуем жителя если он находится в клетке
             }
             private void PaintCell()
             {
@@ -561,13 +577,13 @@ namespace Class_teach
                 if (Rod1.sex == Rod2.sex) return; //однополых семей у нас нет, семью не создаем
                 //добавляем в семью пару родителей
                 members = new List<Men>();
-                if (Rod1 != null) if(!members.Contains(Rod1)) members.Add(Rod1); //проверка при добавлении
+                if (Rod1 != null) if (!members.Contains(Rod1)) members.Add(Rod1); //проверка при добавлении
                 if (Rod2 != null) if (!members.Contains(Rod2)) members.Add(Rod2);// на случай неполной семьи
                 numAdultMembers += 2;
                 //выберем цвет семьи
-                R=Rod1.R ^ Rod2.R;
-                B= Rod1.B ^ Rod2.B;
-                G= Rod1.G ^ Rod2.G;
+                R = Rod1.R ^ Rod2.R;
+                B = Rod1.B ^ Rod2.B;
+                G = Rod1.G ^ Rod2.G;
             }
 
             public void PaintFamily(int x, int y)
@@ -581,7 +597,7 @@ namespace Class_teach
 
             public void AddToFamily(Men newMember) // добавляем в семью новорожденного или нового взрослого(если размер семьи
             {                                       // FAMILY_MAX_COUNT не превышен)
-                if ((newMember.age>AgeAdult && newMember.age<AgeOldman && numAdultMembers<FAMILY_MAX_COUNT)|| newMember.age==0)
+                if ((newMember.age > AgeAdult && newMember.age < AgeOldman && numAdultMembers < FAMILY_MAX_COUNT) || newMember.age == 0)
                     if (!members.Contains(newMember)) { members.Add(newMember); } //добавляем
             }
             public void RemoveFromFamily(Men Member, Family fam) //удаляем члена семьи
@@ -589,7 +605,7 @@ namespace Class_teach
                 int AdultMale = 0;
                 int AdultFemale = 0;
                 if (members.Contains(Member)) { members.Remove(Member); Member.myFamily = null; }
-                foreach(var m in members)// посчитаем количество оставшихся взрослых членов
+                foreach (var m in members)// посчитаем количество оставшихся взрослых членов
                     if (m.age >= AgeAdult) if (m.sex == MALE) AdultMale++; else AdultFemale++;
                 if (AdultFemale == 0 || AdultMale == 0) { RemoveFamily(); fam_base.Remove(fam); } //ликвидация семьи
             }
@@ -599,7 +615,7 @@ namespace Class_teach
                 { m.myFamily = null; }
                 members.Clear();
                 members = null;
-                
+
             }
 
         }
@@ -624,8 +640,8 @@ namespace Class_teach
             public int health { get; private set; }//текущее здоровье индивида
             protected int healthBorn; //здоровье индивила с рождения
             public int fert { get; private set; }//фертильность индивида кол-во детей которое он может произвести
-            protected int fertBorn{ get; private set; }//наследственная плодовитость
-        public Men(Cell cell, Family family=null)
+            protected int fertBorn { get; private set; }//наследственная плодовитость
+            public Men(Cell cell, Family family = null)
             {
                 myFamily = family;
                 relatives = new List<Men>(); //создаем список родственников
@@ -663,10 +679,12 @@ namespace Class_teach
                         }
                         relatives.Add(m); //создаем список родственников из всех членов семьи
                     }
-                    forceBorn = (int)((force / AdultMembers)*(1+ rand1.Next(-1, 2)/10)); //+- 10% от среднего 
-                    healthBorn = (int)((health / AdultMembers)*(1+ rand1.Next(-1, 2)/10));//значения в семье
-                    fertBorn = (int)((fert / AdultMembers)*(1 + rand1.Next(-1, 2)/10));
-                    
+                    forceBorn = (int)((force / AdultMembers) * (1 + rand1.Next(-1, 2) / 10)); //+- 10% от среднего 
+                    forceBorn /= 8; // у ребенка еще мало сил
+                    healthBorn = (int)((health / AdultMembers) * (1 + rand1.Next(-1, 2) / 10));//значения в семье
+                    healthBorn /= 8;// у ребенка еще не много здоровья
+                    fertBorn = (int)((fert / AdultMembers) * (1 + rand1.Next(-1, 2) / 10));
+
                     force = forceBorn;
                     health = healthBorn;
                     fert = fertBorn;
@@ -678,11 +696,11 @@ namespace Class_teach
             private void randMenParams()
             {
                 sex = Convert.ToBoolean(rand1.Next(0, 2));
-                if (sex == MALE) statMales++; 
+                if (sex == MALE) statMales++;
                 else if (sex == FEMALE) statFemales++; else statError = "MAFE3";
                 forceBorn = rand1.Next(10, 128); //сила от 10 до 128
                 healthBorn = rand1.Next(64, 255);  //здоровье задается от макс 255 до четверти 64
-                fertBorn = rand1.Next(0,6); //плодовитость. Каждый ход семейные пары при наличии достаточн. кол-ва еды
+                fertBorn = rand1.Next(0, 6); //плодовитость. Каждый ход семейные пары при наличии достаточн. кол-ва еды
                 //могут произвести ребенка с вероятностью rod1.fert&rod2.fert
                 health = healthBorn;
                 force = forceBorn;
@@ -692,52 +710,75 @@ namespace Class_teach
 
             public void paintMen()
             {
-                int Radius=(int)cellSizeX*80/100; //80% от размера клетки
+                int Radius = (int)cellSizeX * 80 / 100; //80% от размера клетки
                 bool DrawOrFill; // Draw - false ; Fill-true
                 if (age < AgeInfant) { Radius = (int)cellSizeX / 8; DrawOrFill = false; }
                 else if (age < AgeAdult) { Radius = (int)cellSizeX / 2; DrawOrFill = false; }
-                else if (age < AgeOldman) {  DrawOrFill = true; }
+                else if (age < AgeOldman) { DrawOrFill = true; }
                 else { DrawOrFill = false; }
-                int center5=(int)((cellSizeX-Radius)/2); //10% отступы от краев клетки
+                int center5 = (int)((cellSizeX - Radius) / 2); //10% отступы от краев клетки
 
                 if (DrawOrFill == true)
                 {
                     SolidBrush fam_brush = new SolidBrush(Color.FromArgb(R, B, G));
-                    GR.FillEllipse(fam_brush, myCell.x+center5, myCell.y+center5, Radius, Radius);
+                    GR.FillEllipse(fam_brush, myCell.x + center5, myCell.y + center5, Radius, Radius);
                     Pen fam_pen = new Pen(Color.Black);
                     GR.DrawEllipse(fam_pen, myCell.x + center5, myCell.y + center5, Radius, Radius);
                 }
-                else {
+                else
+                {
                     Pen fam_pen = new Pen(Color.FromArgb(R, B, G));
-                    GR.DrawEllipse(fam_pen, myCell.x+center5, myCell.y+center5, Radius, Radius);
+                    GR.DrawEllipse(fam_pen, myCell.x + center5, myCell.y + center5, Radius, Radius);
 
                 }
-                if (myFamily != null) myFamily.PaintFamily(myCell.x,myCell.y);
+                if (myFamily != null) myFamily.PaintFamily(myCell.x, myCell.y);
 
             }
-            public void Stat(int ageDeath=0) //0-человек жив, иначе - возраст смерти
+            public void Stat(int ageDeath = 0) //0-человек жив, иначе - возраст смерти
             {   // функция запускается каждый ход. Увеличивает Возраст 
                 // дополняются статистические списки
-                if(ageDeath!=0)
+                if (ageDeath != 0)
                 {
                     if (ageDeath < AgeInfant) statAgeInfants--;
-                    else if(ageDeath<AgeAdult)statAgeTeens--;
-                    else if(ageDeath<AgeOldman)statAgeAdults--;
-                    else if(ageDeath<MAX_AGE)statAgeOldmans--;
-                    statDeath++; 
+                    else if (ageDeath < AgeAdult) statAgeTeens--;
+                    else if (ageDeath < AgeOldman) statAgeAdults--;
+                    else if (ageDeath < MAX_AGE) statAgeOldmans--;
+                    statDeath++;
                     return;
                 }
-                
+
                 age++;
-                switch(age)
+                switch (age)
                 {
-                    case AgeInfant: statAgeInfants--; statAgeTeens++;
+                    case AgeInfant:
+                        ModifyMan(age); statAgeInfants--; statAgeTeens++;
                         break;
-                    case AgeAdult: statAgeTeens--; statAgeAdults++;
+                    case AgeAdult:
+                        ModifyMan(age); statAgeTeens--; statAgeAdults++;
                         break;
-                    case AgeOldman: statAgeAdults--; statAgeOldmans++;
+                    case AgeOldman:
+                        ModifyMan(age); statAgeAdults--; statAgeOldmans++;
+
                         break;
-                    case MAX_AGE: statAgeOldmans--; 
+                    case MAX_AGE:
+                        statAgeOldmans--; //при смерти
+                        break;
+                }
+
+            }
+            private void ModifyMan(int statAge)
+            {
+                switch (statAge)
+                {
+                    case AgeInfant:
+                        healthBorn *= 4; forceBorn *= 4;//у подростка силы и здоровья в 4раза больше чем у ребенка
+                        break;
+                    case AgeAdult:
+                        healthBorn *= 2; forceBorn *= 2;//у взрослого силы и здоровья вдвое больше чем у подростка
+                        break;
+                    case AgeOldman:
+                        healthBorn /= 4; if (health > healthBorn) health = healthBorn; // в старости здоровье хуже 25%
+                        forceBorn /= 4; if (force > forceBorn) force = forceBorn; // в старости силы осталось 25%
                         break;
                 }
 
@@ -750,18 +791,32 @@ namespace Class_teach
                 relatives = null;
 
             }
-            internal void HealthUp()
-            {
-                if (health >= healthBorn) return; // со здоровьем все в порядке
-
-                int healthUp=(int)(healthBorn*10/100); //восстанавливается за 10% за ход
+            internal void HealthUp(int newValue = 0) //новое значение растущего здоровья
+            {   // или здоровье прогрессивно восстанавливается от сытой жизни
+                if (health >= healthBorn) return; // со здоровьем все в порядке, повышать некуда
+                //Увеличиваем здоровье на заданную величину, если это требует newValue
+                if (newValue != 0) { health += newValue; return; }
+                //просто восстанавливаем здоровье за счет еды 
+                int healthUp;
+                int currentPercent = 100 * health / healthBorn; //текущий процент силы
+                // введем прогрессивную шкалу восстановления силы
+                if (currentPercent > 50) healthUp = healthBorn / 100; // +1%
+                else if (currentPercent > 25) healthUp = healthBorn * 10 / 100;//+10%
+                else if (currentPercent > 10) healthUp = healthBorn * 15 / 100; //+15%
+                else healthUp = healthBorn * 20 / 100; //+20% //меньше минимума не падает сила
                 health += healthUp;
+                if (health > healthBorn) health = healthBorn;
             }
-            internal bool HealthDown(int percent)
+            internal bool HealthDown(int newValue = 0) //уменьшаем здоровье на значение
             {
                 int healthDown;
                 int currentPercent = 100 * health / healthBorn; //текущий процент здоровья
-                // введем прогрессивную шкалу снижения здоровья
+                if (newValue != 0)
+                {
+                    currentPercent -= newValue; if (currentPercent <= 0) { health = 0; return true; }//умер
+                    health = currentPercent * healthBorn / 100; return false;
+                }
+                // введем прогрессивную шкалу снижения здоровья от недоедания
                 if (currentPercent > 50) healthDown = healthBorn * 20 / 100; // -20%
                 else if (currentPercent > 25) healthDown = healthBorn * 10 / 100;//-10%
                 else if (currentPercent > 10) healthDown = healthBorn / 100; //-1%
@@ -769,12 +824,12 @@ namespace Class_teach
                 force -= healthDown;
                 //int healthDown = (int)(healthBorn*percent / 100);
                 // индивид ухудшает свое здоровье голодовкой или дракой
-                if (health < healthDown) { health -= healthDown;  return true; } //умер
+                if (health < healthDown) { health -= healthDown; return true; } //умер
                 else health -= healthDown;
                 return false; // живой :)
             }
-            internal void ForceUp(int newValue=0) //новое значение
-            {  //сила растет после успешной драки, или если newvalue=0 (еды много) , то растет на 1% от forceBorn
+            internal void ForceUp(int newValue = 0) //новое значение
+            {  //сила растет после успешной драки, или если newvalue=0 (еды много) , то прогрессивно растет до forceBorn
                 if (newValue != 0) { force = newValue; return; }
                 //просто восстанавливаем силу за счет еды 
                 int forceUp;
@@ -785,15 +840,15 @@ namespace Class_teach
                 else if (currentPercent > 10) forceUp = forceBorn * 15 / 100; //+15%
                 else forceUp = forceBorn * 20 / 100; //+20% //меньше минимума не падает сила
                 force += forceUp;
-                if(force>forceBorn)force=forceBorn;
+                if (force > forceBorn) force = forceBorn;
             }
-            internal void ForceDown(int value=0)
+            internal void ForceDown(int value = 0)
             {   //сила снижается от голода
                 if (value != 0) // это снижение на определенную величину по требованию
-                { 
-                    if (force > value)force -= value;
-                    else force = forceBorn*10/100; 
-                    return; 
+                {
+                    if (force > value) force -= value;
+                    else force = forceBorn * 10 / 100;
+                    return;
                 }
                 int forceDown;
                 int currentPercent = 100 * force / forceBorn; //текущий процент силы
@@ -801,14 +856,19 @@ namespace Class_teach
                 if (currentPercent > 50) forceDown = forceBorn * 20 / 100; // -20%
                 else if (currentPercent > 25) forceDown = forceBorn * 10 / 100;//-10%
                 else if (currentPercent > 10) forceDown = forceBorn / 100; //-1%
-                else forceDown=0; //меньше минимума не падает сила
+                else forceDown = 0; //меньше минимума не падает сила
                 force -= forceDown;
+            }
+            public void fertDown()
+            {
+                if (fert > 0) fert--;
             }
         } // end for class Men
 
         private void start_btn_Click(object sender, EventArgs e)
         {
-            init_field();
+            if (pole == null) init_field();
+            Do_Stat(true); //очистка статистики
             for (int i = 0; i < nudPeople.Value; i++)
             {
                 Cell myCell = pole.getFreeCell();//ячейки заняты - выходим
