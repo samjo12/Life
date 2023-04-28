@@ -41,6 +41,7 @@ namespace Class_teach
 
         public static Pole pole = null; //поле клеток
         public static long statMoves;
+        public static int statPeople = 0;
         public static int statMales = 0;
         public static int statFemales = 0;
         public static string statError = "";
@@ -71,12 +72,10 @@ namespace Class_teach
         public const int DELAY_CELL_RESTORE = 5; //задержка восстановления значения food в клетке
         public const int createFamilyResource=MAX_CELL_FOOD / 2; //ресурс еды нужный для создания семьи
 
-
         public Form1()
         {
             InitializeComponent();
             GR = Graphics.FromHwnd(Handle);
-
         }
 
         public void init_field()
@@ -102,12 +101,12 @@ namespace Class_teach
             }
         }
 
-
         private void timer1_Tick(object sender, EventArgs e)
         {
             timer1.Stop();
             // Начинаем жить если ожидали таймера, если уже живем - то пропускаем тик.
             // if (flag_life is true) return; else flag_life = true;
+            if (people.Count == 0) { flag_life = false;  return; }//людей нет - жизнь останавливается
             Do_Life();
             timer1.Start();
         }
@@ -136,21 +135,18 @@ namespace Class_teach
             newBorns.Clear(); // уже обработали всех новорожденных. очищаем список
             // обрабатываем пустые ячейки. корм растет 
             foreach (var cell in FreeCells)
-            {
-                cell.foodControl();
-                
-            }
+                cell.foodGrow();
+
             statMoves++;
             Do_Stat(); //обновляем статистику на инфопанели слева
-
         }
-
         
         public void Do_Stat(bool start = false) //обновляем статистику на textbox
         {
             if(start==true)
             {
                 statMoves=0;
+                statPeople = 0;
                 statMales = 0;
                 statFemales = 0;
                 statAgeInfants = 0;
@@ -162,9 +158,11 @@ namespace Class_teach
                 statKills = 0;
                 statDeath = 0;
             }
-            tbMoves.Text = Convert.ToString(statMoves);
-            tbPeople.Text = Convert.ToString(people.Count) + " = " + statError +
-                Convert.ToString(statMales) + " + " + Convert.ToString(statFemales);
+            statPeople = people.Count;
+            tbStatMoves.Text = Convert.ToString(statMoves);
+            tbStatPeople.Text = Convert.ToString(statPeople);
+            tbStatMales.Text = Convert.ToString(statMales);
+            tbStatFemales.Text = Convert.ToString(statFemales);
             tbStatInfants.Text = Convert.ToString(statAgeInfants);
             tbStatTeens.Text = Convert.ToString(statAgeTeens);
             tbStatAdults.Text = Convert.ToString(statAgeAdults);
@@ -358,8 +356,7 @@ namespace Class_teach
                     }
                 }
 
-                //...
-             
+            
                 //...
                 if (currentMan.age >= AgeAdult && currentMan.age < AgeOldman) //взрослый и не старый чел
                 {
@@ -481,7 +478,6 @@ namespace Class_teach
                 numPartners++;
                 foreach (var p in SinglePartners)
                 {
-
                     if ((myFamilyFood+p.Cell.food)/numPartners < createFamilyResource) continue; //мало еды для создания семьи
 
                     if (partner == null) { partner = p; continue; }
@@ -537,7 +533,6 @@ namespace Class_teach
                             if (opp == null) opp = p;
                             else if (p.forceBorn > opp.forceBorn) opp = p;
                         }
-
                     }
                 if (opp == null) //все оппоненты выглядят сильнее
                 { 
@@ -558,7 +553,6 @@ namespace Class_teach
                 int x1 = -1, y1 = -1; //координаты ячейки(по умолчанию -1 не попали ни в какую ячейку)
                 for (j = 0; j < numCellY; j++)
                 {
-
                     if (CellPole[i, j].y < Y && (CellPole[i, j].y + cellSizeY) > Y)
                     {
                         y1 = j; //нашли в j - номер строки
@@ -582,11 +576,8 @@ namespace Class_teach
                     FreeCells.Remove(CellPole[x1, y1]);
                     return CellPole[x1, y1]; // возвращаем ячейку с полученной координатой
                 }
-
             }
-
         }
-
 
         public class Cell
         {
@@ -613,21 +604,16 @@ namespace Class_teach
                 PaintCell(); //перерисуем клетку
                 delayRestore = 0; //задержки восстановления нет
             }
-            public void foodControl()
+            public void foodGrow()// перерасчет food
             {
-                // перерасчет food
-                if (men == null) // клетка пуста
+                if (men != null || food >= MAX_CELL_FOOD) return;// клетка НЕ пуста или имеет макс ресурс еды
+                else if (delayRestore > 0){ delayRestore--; return; }
+                else//задержки нет
                 {
-                    if (delayRestore == 0) //задержки нет
-                    {
-                        if (food < MAX_CELL_FOOD)
-                            food += REST_CELL_FOOD;
-                        if (food > MAX_CELL_FOOD) food = MAX_CELL_FOOD;
-                        delayRestore = DELAY_CELL_RESTORE;
-                        reDrawCell();
-                    }
-                    else //задержка была задана, уменьшаем на 1
-                    { delayRestore--; }
+                    food += REST_CELL_FOOD;
+                    if (food > MAX_CELL_FOOD) food = MAX_CELL_FOOD;
+                    delayRestore = DELAY_CELL_RESTORE;
+                    reDrawCell();
                 }
             }
 
@@ -658,8 +644,6 @@ namespace Class_teach
                 if (food + source.food > MAX_CELL_FOOD) { food = MAX_CELL_FOOD; source.food -= need; }
                 else { food += source.food; source.food = 0; }
             }
-
-
         }
 
         public class Family
@@ -718,9 +702,7 @@ namespace Class_teach
                 { m.myFamily = null; }
                 members.Clear();
                 members = null;
-
             }
-
         }
         public class Men
         {
@@ -994,7 +976,9 @@ namespace Class_teach
 
         private void start_btn_Click(object sender, EventArgs e)
         {
-            if (pole == null) init_field();
+            if (pole == null) { init_field(); }
+            else if (people.Count > 0 && flag_life==true) { timer1.Stop(); flag_life = false; return; }
+            else if(people.Count >0 && flag_life==false){ timer1.Start(); return; }
             Do_Stat(true); //очистка статистики
             for (int i = 0; i < nudPeople.Value; i++)
             {
@@ -1004,12 +988,21 @@ namespace Class_teach
                 people.Add(newman);     // случайного пола без фамилии
                 myCell.Man = newman;
             }
-            /*flag_life = true;
+            flag_life = true;
             timer1.Tick += new EventHandler(timer1_Tick); // Every time timer ticks, timer_Tick will be called
-            timer1.Interval = 10; // 0.1 сек
-            timer1.Start();*/
+             // 0.1 сек
+            timer1.Start();
         }
 
+        private void nudCells_ValueChanged(object sender, EventArgs e)
+        {
+            cellSizeX = (int)nudCells.Value;
+        }
+
+        private void nudSpeed_ValueChanged(object sender, EventArgs e)
+        {
+            timer1.Interval=100 - 10*((int)nudSpeed.Value-1);
+        }
     }
 }
 
