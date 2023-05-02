@@ -112,8 +112,8 @@ namespace Class_teach
         }
         public void Do_Life()
         {
-            // Переберем всех людей и сделать ими ход
-            // нужно перебрать все пустые клетки с неполным ресурсом food
+            // Переберем всех людей - каждый делает ход
+            
             for (int i = 0; i < people.Count; i++)
             {
                 pole.moveMen(people.ElementAt(i));
@@ -133,7 +133,7 @@ namespace Class_teach
                 people.Add(person);     // добавляем в список людей
 
             newBorns.Clear(); // уже обработали всех новорожденных. очищаем список
-            // обрабатываем пустые ячейки. корм растет 
+            // нужно перебрать все пустые клетки с неполным ресурсом food. корм растет
             foreach (var cell in FreeCells)
                 cell.foodGrow();
 
@@ -613,7 +613,7 @@ namespace Class_teach
                     food += REST_CELL_FOOD;
                     if (food > MAX_CELL_FOOD) food = MAX_CELL_FOOD;
                     delayRestore = DELAY_CELL_RESTORE;
-                    reDrawCell();
+                    if (food == MAX_CELL_FOOD) reDrawCell();
                 }
             }
 
