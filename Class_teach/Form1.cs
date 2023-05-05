@@ -18,8 +18,9 @@ namespace Class_teach
     {
         Timer timer1 = new Timer();
         public static Random rand1 = new Random();
-        public static Graphics GR = null;
-        public static Bitmap BM = null;
+        public static Graphics GR = null, GRW=null;
+        public static Bitmap BM = null; //фрейм-буфер
+        public static Panel panel;
         public static List<Men> people = new List<Men>(); // список всех живых людей
         public static List<Men> deadMens = new List<Men>(); // список покойников, обновляется каждый ход
         public static List<Men> newBorns = new List<Men>(); // список новорожденных
@@ -29,7 +30,6 @@ namespace Class_teach
         public static List<Cell> FreeCells = new List<Cell>(); // Список пустых клеток
         public static List<Cell> OccupyCells = new List<Cell>();//Список занятых клеток
 
-        //public DataGridView DataGridView1 = new DataGridView();
         public static int panel_width = 100; // ширина информ-панели слева экрана
         public static bool flag_life = false;//Флаг, где true- идет жизнь, false - ждем таймера
         public static int cellSizeX = 10; // размер клетки в пикселях по оси Х
@@ -55,6 +55,7 @@ namespace Class_teach
         public static int statDeath = 0;
 
         // КОНСТАНТЫ
+        public static bool endless_pole = true; //бесконечное поле
         public const int MAX_AGE = 800; //100 ходов жизни на индивида
         public const int MAX_FERT = 20; //максимально возможное число детей
 
@@ -75,13 +76,27 @@ namespace Class_teach
         public Form1()
         {
             InitializeComponent();
-            GR = Graphics.FromHwnd(Handle);
+            
+            BM = new Bitmap(Size.Width-10, Size.Height-40);  // с размерами
+            //GR = Graphics.FromImage(BM);   // инициализация g
+            /*
+            pictureb = new Panel
+            {
+                Name = "panel1",
+                Size = new Size(Size.Width - panel_width, Size.Height),
+                Location = new Point(0, 0),
+                BackgroundImage=BM
+            };*/
+            //Controls.Add(panel);
+            GR = Graphics.FromImage(BM); //Фрейм-буфер для сохранения графики
+
+            GRW = Graphics.FromHwnd(Handle); // вывод фрейма в окно
         }
 
         public void init_field()
         {
             //передаем размеры формы в пикселях
-            pole = new Pole(Size.Width, Size.Height); //создаем поле питательных клеток
+            pole = new Pole(Size.Width-10, Size.Height-40); //создаем поле питательных клеток
         }
 
         private void Form1_MouseDown(object sender, MouseEventArgs e)
@@ -137,6 +152,7 @@ namespace Class_teach
             foreach (var cell in FreeCells)
                 cell.foodGrow();
 
+            GRW.DrawImageUnscaled(BM, 0, 0);//обновляем картинку
             statMoves++;
             Do_Stat(); //обновляем статистику на инфопанели слева
         }
@@ -218,9 +234,11 @@ namespace Class_teach
                     oldCell.PaintAlarm();
                 newCell = lookAround(oldCell); //осмотрим все соседние клетки и получим выбор
                 if (newCell != null)// получили новую клетку для хода
-                {
-                    setFreeCell(oldCell);
-                    setBuzyCell(newCell, person);
+                {   if (newCell != oldCell)
+                    {
+                        setFreeCell(oldCell);
+                        setBuzyCell(newCell, person);
+                    }
                     mealMen(newCell, person); //пора поесть+, или поголодать -
                 }
                 else //умер. нужно убрать его из семьи и из списков всех родственников
@@ -228,7 +246,6 @@ namespace Class_teach
                     deadMens.Add(person); //добавляем в список на удаление
                     setFreeCell(oldCell); //освобождаем клетку
                 }
-
             }
             public int is_meal(Men person)
             {
@@ -318,17 +335,45 @@ namespace Class_teach
                 Men currentMan = currentCell.Man;
 
                 // не будем смотреть в сторону за края поля, где нет других клеток
-                if (i > 0) { iac.Add(i - 1); jac.Add(j); } //Left 0
-                if (i > 0 && j > 0) { iac.Add(i - 1); jac.Add(j - 1); } //UP&LEFT 1
-                if (j > 0) { iac.Add(i); jac.Add(j - 1); }//UP 2
-                if (i < numCellX - 1 && j > 0) { iac.Add(i + 1); jac.Add(j - 1); }//UP&Right 3
-                if (i < numCellX - 1) { iac.Add(i + 1); jac.Add(j); }//Right 4
-                if (i < numCellX - 1 && j < numCellY - 1) { iac.Add(i + 1); jac.Add(j + 1); }//Right & DOWN 5
-                if (j < numCellY - 1) { iac.Add(i); jac.Add(j + 1); }//DOWN 6
-                if (i > 0 && j < numCellY - 1) { iac.Add(i - 1); jac.Add(j + 1); }//Left & DOWN 7
+                //Left 0
+                if (i > 0) { iac.Add(i - 1); }
+                else if(endless_pole==true){ iac.Add(numCellX - 1);  }
+                jac.Add(j);
+                //UP&LEFT 1
+                if (i > 0) { iac.Add(i - 1); } 
+                else if (endless_pole == true){ iac.Add(numCellX - 1); }
+                if (j > 0) { jac.Add(j - 1); }
+                else if (endless_pole == true){ jac.Add(numCellY - 1); }
+                //UP 2
+                iac.Add(i);
+                if (j > 0) {  jac.Add(j - 1); }
+                else if (endless_pole == true) { jac.Add(numCellY - 1); }
+                //UP&Right 3
+                if (i < numCellX - 1) { iac.Add(i + 1); }
+                else if (endless_pole == true) { iac.Add(0); }
+                if (j > 0) { jac.Add(j - 1); }
+                else if (endless_pole == true) { jac.Add(numCellY - 1); }
+                //Right 4
+                if (i < numCellX - 1) { iac.Add(i + 1);  }
+                else if (endless_pole == true) { iac.Add(0); }
+                jac.Add(j);
+                //Right & DOWN 5
+                if (i < numCellX - 1) { iac.Add(i + 1); }
+                else if (endless_pole == true) { iac.Add(0); }
+                if (j < numCellY - 1) { jac.Add(j + 1); }
+                else if (endless_pole == true) { jac.Add(0); }
+                //DOWN 6
+                iac.Add(i);
+                if (j < numCellY - 1) { jac.Add(j + 1); }
+                else if (endless_pole == true) { jac.Add(0); }
+                //Left & DOWN 7
+                if (i > 0) { iac.Add(i - 1); }
+                else if (endless_pole == true) { iac.Add(numCellX - 1); }
+                if (j < numCellY - 1) { jac.Add(j + 1); }
+                else if (endless_pole == true) { jac.Add(0); }
 
 
-                for (ind = 0; ind < iac.Count; ind++)// посмотрим на все соседние ячейки
+                    for (ind = 0; ind < iac.Count; ind++)// посмотрим на все соседние ячейки
                 {
                     if (CellPole[iac[ind], jac[ind]].Man != null) //соседняя ячейка занята человеком
                     {
@@ -619,23 +664,23 @@ namespace Class_teach
 
             public void reDrawCell()//обновляем цвет ячейки в зависимости от food
             {   // зеленый -белый(много/мало еды)
-
-                
-                if (men != null) men.paintMen(); //перерисуем жителя если он находится в клетке
-                else PaintCell(); //перерисуем клетку
+                PaintCell();
+                if (men != null) {  men.paintMen(); }//перерисуем жителя если он находится в клетке
+                //else  //перерисуем клетку
             }
             private void PaintCell()
             {
                 SolidBrush myCellColor = new SolidBrush(Color.FromArgb(255 - food, 255, 255 - food)); //255 цвет
                 GR.FillRectangle(myCellColor, x, y, w, h);
-                Pen fam_pen = new Pen(Color.Black);
+                
+                Pen fam_pen = new Pen(Color.Gray);
                 GR.DrawRectangle(fam_pen, x, y, w, h);
             }
             public void PaintAlarm()
             {
                 SolidBrush myCellColor = new SolidBrush(Color.FromArgb(255, 0, 0)); //255 цвет красный
                 GR.FillRectangle(myCellColor, x, y, w, h);
-                Pen fam_pen = new Pen(Color.Black);
+                Pen fam_pen = new Pen(Color.Gray);
                 GR.DrawRectangle(fam_pen, x, y, w, h);
             }
             public void grab(Cell source) //забираем все ресурсы клетки source
@@ -798,7 +843,7 @@ namespace Class_teach
             {
                 int Radius = (int)cellSizeX * 80 / 100; //80% от размера клетки
                 bool DrawOrFill; // Draw - false ; Fill-true
-                if (age < AgeInfant) { Radius = (int)cellSizeX / 8; DrawOrFill = false; }
+                if (age < AgeInfant) { Radius = (int)cellSizeX / 4; DrawOrFill = false; }
                 else if (age < AgeAdult) { Radius = (int)cellSizeX / 2; DrawOrFill = false; }
                 else if (age < AgeOldman) { DrawOrFill = true; }
                 else { DrawOrFill = false; }
@@ -1002,6 +1047,11 @@ namespace Class_teach
         private void nudSpeed_ValueChanged(object sender, EventArgs e)
         {
             timer1.Interval=100 - 10*((int)nudSpeed.Value-1);
+        }
+
+        private void nudPeople_ValueChanged(object sender, EventArgs e)
+        {
+            
         }
     }
 }

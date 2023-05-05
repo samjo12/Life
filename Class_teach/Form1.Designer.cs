@@ -160,14 +160,25 @@ namespace Class_teach
             // nudPeople
             // 
             this.nudPeople.Location = new System.Drawing.Point(7, 95);
+            this.nudPeople.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            this.nudPeople.Minimum = new decimal(new int[] {
+            20,
+            0,
+            0,
+            0});
             this.nudPeople.Name = "nudPeople";
             this.nudPeople.Size = new System.Drawing.Size(88, 23);
             this.nudPeople.TabIndex = 10;
             this.nudPeople.Value = new decimal(new int[] {
-            10,
+            100,
             0,
             0,
             0});
+            this.nudPeople.ValueChanged += new System.EventHandler(this.nudPeople_ValueChanged);
             // 
             // tbStatInfants
             // 
@@ -348,7 +359,7 @@ namespace Class_teach
             this.nudSpeed.Size = new System.Drawing.Size(88, 23);
             this.nudSpeed.TabIndex = 20;
             this.nudSpeed.Value = new decimal(new int[] {
-            1,
+            10,
             0,
             0,
             0});
@@ -358,7 +369,8 @@ namespace Class_teach
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1784, 961);
+            this.AutoSize = true;
+            this.ClientSize = new System.Drawing.Size(1904, 1041);
             this.Controls.Add(this.nudSpeed);
             this.Controls.Add(this.label13);
             this.Controls.Add(this.tbStatFemales);
@@ -390,8 +402,12 @@ namespace Class_teach
             this.Controls.Add(this.label4);
             this.Controls.Add(this.family_count_label);
             this.Controls.Add(this.individ_count_label);
+            this.MaximumSize = new System.Drawing.Size(1920, 1080);
+            this.MinimizeBox = false;
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.ShowInTaskbar = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.WindowsDefaultBounds;
+            this.Text = "Жиза";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             ((System.ComponentModel.ISupportInitialize)(this.nudCells)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudPeople)).EndInit();
