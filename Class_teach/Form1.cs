@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Windows.Forms.AxHost;
+using System.Security.Cryptography;
 
 
 namespace Class_teach
@@ -70,7 +71,7 @@ namespace Class_teach
         public const bool MALE = false;
         public const bool FEMALE = true;
 
-        public const int DELAY_CELL_RESTORE = 5; //задержка восстановления значения food в клетке
+        public const int DELAY_CELL_RESTORE = 7; //задержка восстановления значения food в клетке
         public const int createFamilyResource=MAX_CELL_FOOD / 2; //ресурс еды нужный для создания семьи
 
         public Form1()
@@ -319,6 +320,7 @@ namespace Class_teach
                 Cell newCell = null;
                 int i = currentCell.i;
                 int j = currentCell.j;
+                int myMove; 
 
                 // оглядим все клетки вокруг currentCell
                 //AC = AroundCells
@@ -373,7 +375,7 @@ namespace Class_teach
                 else if (endless_pole == true) { jac.Add(0); }
 
 
-                    for (ind = 0; ind < iac.Count; ind++)// посмотрим на все соседние ячейки
+                for (ind = 0; ind < iac.Count; ind++)// посмотрим на все соседние ячейки
                 {
                     if (CellPole[iac[ind], jac[ind]].Man != null) //соседняя ячейка занята человеком
                     {
@@ -443,7 +445,9 @@ namespace Class_teach
                         if (wholeFood / currentMan.myFamily.members.Count > MAX_CELL_FOOD /2)
                         {   // еды достаточно, в семье рождается ребенок и
                             // помещается на одну из пустых клеток списка AC_moves
-                            Cell childCell = AC_moves.ElementAt(rand1.Next(0, AC_moves.Count)); // выберем место для ребенка
+                            myMove = RandomNumberGenerator.GetInt32(0, AC_moves.Count);
+                            //Cell childCell = AC_moves.ElementAt(rand1.Next(0, AC_moves.Count)); // выберем место для ребенка
+                            Cell childCell = AC_moves.ElementAt(myMove);
                             Family childFam = currentMan.myFamily; //семья родителей
                             Men newman = new Men(childCell, childFam); //родился ребенок
                             childCell.Man = newman;
@@ -462,30 +466,35 @@ namespace Class_teach
 
                 //Оценим количество еды вокруг и 
                 // Если клеток с максимальным запасом еды несколько, то выберем направление случайно
-                if (AC_MaxFood.Count > 0) return AC_MaxFood.ElementAt(rand1.Next(0, AC_MaxFood.Count));
+                
+                if (AC_MaxFood.Count > 0)
+                { 
+                    myMove= RandomNumberGenerator.GetInt32(0, AC_MaxFood.Count);
+                    return AC_MaxFood.ElementAt(myMove); 
+                }
                 else
                 {//проверим есть ли неполные клетки в которых достаточно еды
                     int max_food = currentCell.food;
                     int decFood = is_meal(currentMan);
                     newCell = currentCell;
-                    if(AC_SomeFood.Count>0)
-                    foreach (var m in AC_SomeFood)
-                    { // ищем клетку с макс. запасом оставшейся еды
-                        if (m.food > max_food) newCell = m;
-                    }
+                    if (AC_SomeFood.Count > 0)
+                        foreach (var m in AC_SomeFood)
+                        { // ищем клетку с макс. запасом оставшейся еды
+                            if (m.food > max_food) newCell = m;
+                        }
 
-                    if (AC_SomeFood.Count == 0 || max_food<decFood) 
+                    if (AC_SomeFood.Count == 0 || max_food < decFood)
                     {//похоже что еды вокруг недостаточно 
-                        if (currentCell.food < decFood || AC_moves.Count==0)  
+                        if (currentCell.food < decFood || AC_moves.Count == 0)
                         {//в моей клетке тоже недостаточно еды или вокруг нет свободных клеток
                             if (AC_NonFamily.Count() > 0) // Если вокруг есть неродственники, то нападаем 
                             { //на самого слабого, и в случае победы забираем ресурсы его клетки
                                 // при этом здоровье теряет только проигравший
-                                Men opponent=findBestOpp(AC_NonFamily, currentCell);
+                                Men opponent = findBestOpp(AC_NonFamily, currentCell);
                                 //if (opponent == null) { if(AC_moves.Count>0)return randMove(AC_moves); } //драки не вышло- идем куда идем...
-                                bool Wins= currentMan.Battle(opponent);
+                                bool Wins = currentMan.Battle(opponent);
                                 statBattles++;
-                                if (Wins == true)return currentCell;//остаемся на месте
+                                if (Wins == true) return currentCell;//остаемся на месте
                                 else // currentMen - погиб в бою
                                 {
                                     statKills++;
@@ -697,6 +706,7 @@ namespace Class_teach
             public int B { get; private set; }
             public int G { get; private set; }
 
+
             // семья состоит из взрослых членов разных полов
             // если в семье остается один взрослый - семья распадается,
             // дети являются родственниками всем взрослым членам семьи
@@ -716,15 +726,6 @@ namespace Class_teach
                 R = Rod1.R ^ Rod2.R;
                 B = Rod1.B ^ Rod2.B;
                 G = Rod1.G ^ Rod2.G;
-            }
-
-            public void PaintFamily(int x, int y)
-            {
-                int Radius = (int)cellSizeX * 10 / 100; //10% от размера клетки
-                int center5 = (int)((cellSizeX - Radius) / 2); //10% отступы от краев клетки
-
-                SolidBrush fam_brush = new SolidBrush(Color.FromArgb(R, B, G));
-                GR.FillEllipse(fam_brush, x + center5, y + center5, Radius, Radius);
             }
 
             public void AddToFamily(Men newMember) // добавляем в семью новорожденного или нового взрослого(если размер семьи
@@ -838,7 +839,6 @@ namespace Class_teach
                 fert = fertBorn; //кол-во детей которое осталось/возможно произвести
             }
 
-
             public void paintMen()
             {
                 int Radius = (int)cellSizeX * 80 / 100; //80% от размера клетки
@@ -862,9 +862,18 @@ namespace Class_teach
                     GR.DrawEllipse(fam_pen, myCell.x + center5, myCell.y + center5, Radius, Radius);
 
                 }
-                if (myFamily != null) myFamily.PaintFamily(myCell.x, myCell.y);
-
+                if (myFamily != null) 
+                {
+                    SolidBrush fam_brush = new SolidBrush(Color.FromArgb(myFamily.R, myFamily.B, myFamily.G));
+                    GR.FillEllipse(fam_brush, myCell.x + center5+1, myCell.y + center5+1, Radius-2, Radius-2);
+                } 
+                // нарисуем вертикальную шкалу здоровья по левому краю клетки
+                //Pen health_pen = new Pen(Color.Black);
+                //int ttt =  cellSizeY * ((health <= healthBorn ? health : 1 )/ (healthBorn>0?healthBorn:1));
+                //GR.DrawLine(health_pen, myCell.x+1, myCell.y+ttt, 
+                //    myCell.x+1, myCell.y+cellSizeY);
             }
+
             public void Stat(int ageDeath = 0) //0-человек жив, иначе - возраст смерти
             {   // функция запускается каждый ход. Увеличивает Возраст 
                 // дополняются статистические списки
@@ -1005,13 +1014,15 @@ namespace Class_teach
 
                 if (deltaForce > 0)
                 {
-                    myCell.grab(opp.myCell);//ЗАБИРАЮ РЕСУРСЫ ПРОТИВНИКА
+                    myCell.grab(opp.myCell);//ПЕРЕНОШУ ЕДУ ПРОТИВНИКА В свою КЛЕТКУ
+                    //opp.myCell.grab(myCell);//ПЕРЕНОШУ СВОЮ ЕДУ В КЛЕТКУ ПРОТИВНИКА
                     result = true; // я остался жив
                 }
                 else //сила противника была выше, если я выживу , то стану сильнее
                 {
                     force += (int)(modDeltaForce / 2); //сила выросла
                     opp.myCell.grab(myCell); //противник забрал мои ресурсы
+                    //myCell.grab(opp.myCell); // противник перенес свои ресурсы на мою клетку 
 
                     result = false;
                 }
