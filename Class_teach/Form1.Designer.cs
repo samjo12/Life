@@ -60,6 +60,7 @@ namespace Class_teach
             this.tbStatFemales = new System.Windows.Forms.TextBox();
             this.label13 = new System.Windows.Forms.Label();
             this.nudSpeed = new System.Windows.Forms.NumericUpDown();
+            this.btnReset = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.nudCells)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudPeople)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudSpeed)).BeginInit();
@@ -87,9 +88,9 @@ namespace Class_teach
             // 
             this.start_btn.Location = new System.Drawing.Point(7, 3);
             this.start_btn.Name = "start_btn";
-            this.start_btn.Size = new System.Drawing.Size(88, 23);
+            this.start_btn.Size = new System.Drawing.Size(32, 23);
             this.start_btn.TabIndex = 4;
-            this.start_btn.Text = "Старт/Стоп";
+            this.start_btn.Text = "> ||";
             this.start_btn.UseVisualStyleBackColor = true;
             this.start_btn.Click += new System.EventHandler(this.start_btn_Click);
             // 
@@ -365,12 +366,23 @@ namespace Class_teach
             0});
             this.nudSpeed.ValueChanged += new System.EventHandler(this.nudSpeed_ValueChanged);
             // 
+            // btnReset
+            // 
+            this.btnReset.Location = new System.Drawing.Point(59, 3);
+            this.btnReset.Name = "btnReset";
+            this.btnReset.Size = new System.Drawing.Size(36, 23);
+            this.btnReset.TabIndex = 21;
+            this.btnReset.Text = "RST";
+            this.btnReset.UseVisualStyleBackColor = true;
+            this.btnReset.Click += new System.EventHandler(this.btnReset_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(1904, 1041);
+            this.Controls.Add(this.btnReset);
             this.Controls.Add(this.nudSpeed);
             this.Controls.Add(this.label13);
             this.Controls.Add(this.tbStatFemales);
@@ -450,6 +462,7 @@ namespace Class_teach
         private System.Windows.Forms.TextBox tbStatFemales;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.NumericUpDown nudSpeed;
+        private System.Windows.Forms.Button btnReset;
     }
 }
 
