@@ -78,7 +78,7 @@ namespace Class_teach
             // family_count_label
             // 
             this.family_count_label.AutoSize = true;
-            this.family_count_label.Location = new System.Drawing.Point(7, 742);
+            this.family_count_label.Location = new System.Drawing.Point(7, 712);
             this.family_count_label.Name = "family_count_label";
             this.family_count_label.Size = new System.Drawing.Size(46, 15);
             this.family_count_label.TabIndex = 3;
@@ -103,7 +103,7 @@ namespace Class_teach
             // 
             // tbStatFam
             // 
-            this.tbStatFam.Location = new System.Drawing.Point(7, 760);
+            this.tbStatFam.Location = new System.Drawing.Point(7, 730);
             this.tbStatFam.Name = "tbStatFam";
             this.tbStatFam.Size = new System.Drawing.Size(88, 23);
             this.tbStatFam.TabIndex = 5;
@@ -289,9 +289,9 @@ namespace Class_teach
             this.label10.AutoSize = true;
             this.label10.Location = new System.Drawing.Point(12, 356);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(27, 15);
+            this.label10.Size = new System.Drawing.Size(58, 15);
             this.label10.TabIndex = 13;
-            this.label10.Text = "Ход";
+            this.label10.Text = "Ход игры";
             // 
             // tbStatMoves
             // 
@@ -336,7 +336,7 @@ namespace Class_teach
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(7, 304);
+            this.label13.Location = new System.Drawing.Point(7, 122);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(59, 15);
             this.label13.TabIndex = 19;
@@ -345,7 +345,7 @@ namespace Class_teach
             // nudSpeed
             // 
             this.nudSpeed.BackColor = System.Drawing.SystemColors.Info;
-            this.nudSpeed.Location = new System.Drawing.Point(7, 322);
+            this.nudSpeed.Location = new System.Drawing.Point(7, 140);
             this.nudSpeed.Maximum = new decimal(new int[] {
             10,
             0,
