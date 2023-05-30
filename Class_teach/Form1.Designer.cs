@@ -61,9 +61,12 @@ namespace Class_teach
             this.label13 = new System.Windows.Forms.Label();
             this.nudSpeed = new System.Windows.Forms.NumericUpDown();
             this.btnReset = new System.Windows.Forms.Button();
+            this.nudWalls = new System.Windows.Forms.NumericUpDown();
+            this.label14 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.nudCells)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudPeople)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudSpeed)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudWalls)).BeginInit();
             this.SuspendLayout();
             // 
             // individ_count_label
@@ -336,7 +339,7 @@ namespace Class_teach
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(7, 122);
+            this.label13.Location = new System.Drawing.Point(7, 167);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(59, 15);
             this.label13.TabIndex = 19;
@@ -345,7 +348,7 @@ namespace Class_teach
             // nudSpeed
             // 
             this.nudSpeed.BackColor = System.Drawing.SystemColors.Info;
-            this.nudSpeed.Location = new System.Drawing.Point(7, 140);
+            this.nudSpeed.Location = new System.Drawing.Point(7, 185);
             this.nudSpeed.Maximum = new decimal(new int[] {
             10,
             0,
@@ -376,12 +379,41 @@ namespace Class_teach
             this.btnReset.UseVisualStyleBackColor = true;
             this.btnReset.Click += new System.EventHandler(this.btnReset_Click);
             // 
+            // nudWalls
+            // 
+            this.nudWalls.Location = new System.Drawing.Point(7, 140);
+            this.nudWalls.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            this.nudWalls.Name = "nudWalls";
+            this.nudWalls.Size = new System.Drawing.Size(88, 23);
+            this.nudWalls.TabIndex = 23;
+            this.nudWalls.Value = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.nudWalls.ValueChanged += new System.EventHandler(this.nudWalls_ValueChanged);
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(4, 122);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(45, 15);
+            this.label14.TabIndex = 22;
+            this.label14.Text = "Стены:";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(1904, 1041);
+            this.Controls.Add(this.nudWalls);
+            this.Controls.Add(this.label14);
             this.Controls.Add(this.btnReset);
             this.Controls.Add(this.nudSpeed);
             this.Controls.Add(this.label13);
@@ -421,9 +453,11 @@ namespace Class_teach
             this.StartPosition = System.Windows.Forms.FormStartPosition.WindowsDefaultBounds;
             this.Text = "Жиза";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+            this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseDown);
             ((System.ComponentModel.ISupportInitialize)(this.nudCells)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudPeople)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudSpeed)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudWalls)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -463,6 +497,8 @@ namespace Class_teach
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.NumericUpDown nudSpeed;
         private System.Windows.Forms.Button btnReset;
+        private System.Windows.Forms.NumericUpDown nudWalls;
+        private System.Windows.Forms.Label label14;
     }
 }
 
