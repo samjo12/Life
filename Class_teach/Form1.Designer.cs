@@ -1,5 +1,5 @@
 ﻿
-namespace Class_teach
+namespace Jiza
 {
     partial class Form1
     {
@@ -134,7 +134,7 @@ namespace Class_teach
             this.nudCells.Size = new System.Drawing.Size(88, 23);
             this.nudCells.TabIndex = 7;
             this.nudCells.Value = new decimal(new int[] {
-            40,
+            10,
             0,
             0,
             0});
@@ -175,7 +175,7 @@ namespace Class_teach
             this.nudPeople.Size = new System.Drawing.Size(88, 23);
             this.nudPeople.TabIndex = 10;
             this.nudPeople.Value = new decimal(new int[] {
-            4,
+            400,
             0,
             0,
             0});
@@ -360,7 +360,7 @@ namespace Class_teach
             this.nudSpeed.Size = new System.Drawing.Size(88, 23);
             this.nudSpeed.TabIndex = 20;
             this.nudSpeed.Value = new decimal(new int[] {
-            1,
+            10,
             0,
             0,
             0});
@@ -419,7 +419,7 @@ namespace Class_teach
             this.Name = "Form1";
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.WindowsDefaultBounds;
-            this.Text = "Жиза v0.6 beta by Samjo";
+            this.Text = "Жиза v0.61 beta by Samjo";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseDown);
             ((System.ComponentModel.ISupportInitialize)(this.nudCells)).EndInit();

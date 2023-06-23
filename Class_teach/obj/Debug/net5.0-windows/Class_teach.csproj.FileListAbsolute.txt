@@ -5,7 +5,6 @@ C:\Users\amsad\source\repos\Class_teach\bin\Debug\net5.0-windows\Class_teach.run
 C:\Users\amsad\source\repos\Class_teach\bin\Debug\net5.0-windows\Class_teach.dll
 C:\Users\amsad\source\repos\Class_teach\bin\Debug\net5.0-windows\ref\Class_teach.dll
 C:\Users\amsad\source\repos\Class_teach\bin\Debug\net5.0-windows\Class_teach.pdb
-C:\Users\amsad\source\repos\Class_teach\obj\Debug\net5.0-windows\Class_teach.Form1.resources
 C:\Users\amsad\source\repos\Class_teach\obj\Debug\net5.0-windows\Class_teach.csproj.GenerateResource.cache
 C:\Users\amsad\source\repos\Class_teach\obj\Debug\net5.0-windows\Class_teach.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\amsad\source\repos\Class_teach\obj\Debug\net5.0-windows\Class_teach.AssemblyInfoInputs.cache
@@ -34,3 +33,4 @@ C:\Users\USR\Documents\GitHub\Life\Class_teach\obj\Debug\net5.0-windows\refint\C
 C:\Users\USR\Documents\GitHub\Life\Class_teach\obj\Debug\net5.0-windows\Class_teach.pdb
 C:\Users\USR\Documents\GitHub\Life\Class_teach\obj\Debug\net5.0-windows\Class_teach.genruntimeconfig.cache
 C:\Users\USR\Documents\GitHub\Life\Class_teach\obj\Debug\net5.0-windows\ref\Class_teach.dll
+C:\Users\amsad\source\repos\Class_teach\obj\Debug\net5.0-windows\Jiza.Form1.resources
