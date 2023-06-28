@@ -34,7 +34,7 @@ namespace Jiza
         public static List<Block> BlockCells = new List<Block>(); //список клеток занятых блоками
         public static int panel_width = 100; // ширина информ-панели слева экрана
         public static bool flag_life = false;//Флаг, где true- идет жизнь, false - ждем таймера
-        public static int cellSizeX = 100; // размер клетки в пикселях по оси Х
+        public static int cellSizeX; // размер клетки в пикселях по оси Х
         public static int cellSizeY; // размер клетки в пикселях по оси Y (считаем автомат. как 9:16)       
         public static int numCellX; //Кол-во клеток по горизонтали
         public static int numCellY; //Кол-во клеток по вертикали
@@ -103,6 +103,7 @@ namespace Jiza
             SolidBrush brush = new SolidBrush(Control.DefaultBackColor);
             GRempty.FillRectangle(brush, 0, 0, BMempty.Width, BMempty.Height);
             Show_instruction(); // выводим инструкцию
+
         }
 
         public void Show_instruction()
@@ -158,6 +159,7 @@ namespace Jiza
         {
             //ощищаем поле
             //передаем размеры формы в пикселях
+            cellSizeX = (int)nudCells.Value;
             pole = new Pole(Size.Width - 10, Size.Height - 40); //создаем поле питательных клеток
         }
 
@@ -214,7 +216,7 @@ namespace Jiza
             // Начинаем жить если ожидали таймера, если уже живем - то пропускаем тик.
             // if (flag_life is true) return; else flag_life = true;
             if (people.Count == 0)
-            { flag_life = false; btnReset_Click(null, null); return; }//людей нет - жизнь останавливается
+            { flag_life = false;  return; }//людей нет - жизнь останавливается
             Do_Life();
             if (flag_life == false) timer1.Stop();
             else timer1.Start();
@@ -223,7 +225,7 @@ namespace Jiza
         {
             foreach (var item in BlockCells)
             {
-
+                pole.mealBlock(item);
                 //поедим
                 // размножимся
 
@@ -293,12 +295,16 @@ namespace Jiza
             tbStatKills.Text = Convert.ToString(statKills);
 
         }
+        public static class Data 
+        { 
+            public static Cell[,] CellPole=new Cell[numCellX, numCellY];
+        }
         public class Pole
         {
             static int FormWidth;
             static int FormHeight;
 
-            public static Cell[,] CellPole;
+            
             public Pole(int sizeW, int sizeH)
             {// инициализация поля с кормом
                 FormWidth = sizeW - panel_width;//получаем размер формы - 100 пикселей на меню
@@ -310,7 +316,7 @@ namespace Jiza
                 cellSizeY = cellSizeX;// (int)(9 * cellSizeX / 16);
                 numCellY = (int)(FormHeight / cellSizeY);
 
-                CellPole = new Cell[numCellX, numCellY];// Создадим массив для хранения состояния ячеек
+                //Data.CellPole = new Cell[numCellX, numCellY];// Создадим массив для хранения состояния ячеек
 
                 for (int j = 0; j < numCellY; j++)
                 {
@@ -318,9 +324,9 @@ namespace Jiza
                     {
                         int X = panel_width + i * cellSizeX; //100+i*cellSizeX
                         int Y = j * cellSizeY;
-                        CellPole[i, j] = new Cell(X, Y, cellSizeX, cellSizeY);  //создадим пустые клетки с кормом
-                        CellPole[i, j].i = i; CellPole[i, j].j = j;
-                        FreeCells.Add(CellPole[i, j]); //записываем в список свободных ячеек
+                        Data.CellPole[i, j] = new Cell(X, Y, cellSizeX, cellSizeY);  //создадим пустые клетки с кормом
+                        Data.CellPole[i, j].i = i; Data.CellPole[i, j].j = j;
+                        FreeCells.Add(Data.CellPole[i, j]); //записываем в список свободных ячеек
                     }
                 }
             }
@@ -373,6 +379,42 @@ namespace Jiza
                 }
                 else { person.HealthDown(); }
             }
+            public List<Cell> GetFreeCellsWithFamily(Cell currentCell, Family myFamily)
+            {
+                List<Cell> aroundCells;// = new List<Cell>();
+                List<Cell> freeCells = new List<Cell>();
+                aroundCells = getCellsAroundMe(currentCell);
+                foreach (var cell in aroundCells)// находим все свободные ячейки и считаем сколько в них еды
+                {
+                    if (cell.block == null && cell.Man == null) { freeCells.Add(cell); }
+                    else if (cell.Man != null && cell.Man.myFamily!=null && cell.Man.myFamily == myFamily)
+                    { freeCells.AddRange(GetFreeCellsWithFamily(cell, myFamily)); }
+
+                }
+                freeCells.Distinct();//удалим дубликаты;
+                return freeCells;
+            }
+            public void mealBlock(Block block)
+            {
+                // работает, если нет соседних  блоков
+                List<Cell> freeCells = new List<Cell>();
+                int foodInFreeCells = 0;
+                freeCells.AddRange(GetFreeCellsWithFamily(block.myCell, block.myFamily));
+                freeCells.Distinct();//удалим дубликаты;
+                int N = freeCells.Count;
+                int sub = DEC_CELL_FOOD * block.residents.Count / N;
+                if (sub < foodInFreeCells)
+                    foreach (var cell in freeCells)
+                    {
+                        if (cell.food > sub) { cell.food -= sub; foodInFreeCells -= sub; }
+                        else
+                        {
+                            foodInFreeCells -= cell.food; cell.food = 0;
+                            if (N > 0) N--; sub = DEC_CELL_FOOD * block.residents.Count / N;
+                        }
+
+                    }
+            }
 
             internal void deadMan(Men men)
             {
@@ -403,7 +445,9 @@ namespace Jiza
             public Cell getFreeCell()
             {  // отбираем все свободные ячейки и случайно возвращаем любую из них,
                 // или если все заняты - возвращаем null
-                int c = rand1.Next(0, FreeCells.Count);
+                int free_counter = FreeCells.Count;
+                if (free_counter == 0) return null;
+                int c = rand1.Next(0, free_counter);
                 Cell freecell = FreeCells.ElementAt(c);
                 // сразу заносим ячейку в список занятыми ячейками
                 // и исключаем из списка со свободными ячейками
@@ -423,7 +467,7 @@ namespace Jiza
                 else if (endless_pole == true) { return (limit - 1); }
                 return -1; //запрещенное состояние
             }
-            protected List<Cell> getCellsAroundMe(Cell currentCell) //Проверено 100%
+            public List<Cell> getCellsAroundMe(Cell currentCell) //Проверено 100%
             {    // вернем список клеток окружающих ходящего персонажа    
                  // не будем смотреть в сторону за края поля, где нет других клеток
                  // или будем, если включен режим бесконечного поля endless_pole
@@ -434,40 +478,40 @@ namespace Jiza
                 List<Cell> cells = new List<Cell>();
 
                 //UP 0 (0,-)
-                if (j > 0) { cells.Add(CellPole[i, j - 1]); }
-                else if (endless_pole == true) { cells.Add(CellPole[i, numCellY - 1]); }
+                if (j > 0) { cells.Add(Data.CellPole[i, j - 1]); }
+                else if (endless_pole == true) { cells.Add(Data.CellPole[i, numCellY - 1]); }
 
                 //UP&Right 1 (+,-)
                 iac = plusCell(i, numCellX);
                 jac = minusCell(j, numCellY);
-                if ((iac + jac) >= 0) cells.Add(CellPole[iac, jac]);
+                if ((iac + jac) >= 0) cells.Add(Data.CellPole[iac, jac]);
 
                 //Right 2 (+,0)
-                if (i < numCellX - 1) { cells.Add(CellPole[i + 1, j]); }
-                else if (endless_pole == true) { cells.Add(CellPole[0, j]); }
+                if (i < numCellX - 1) { cells.Add(Data.CellPole[i + 1, j]); }
+                else if (endless_pole == true) { cells.Add(Data.CellPole[0, j]); }
 
                 //Right & DOWN 3 (+,+)
                 iac = plusCell(i, numCellX);
                 jac = plusCell(j, numCellY);
-                if ((iac + jac) >= 0) cells.Add(CellPole[iac, jac]);
+                if ((iac + jac) >= 0) cells.Add(Data.CellPole[iac, jac]);
 
                 //DOWN 4 (0,+)
-                if (j < numCellY - 1) { cells.Add(CellPole[i, j + 1]); }
-                else if (endless_pole == true) { cells.Add(CellPole[i, 0]); }
+                if (j < numCellY - 1) { cells.Add(Data.CellPole[i, j + 1]); }
+                else if (endless_pole == true) { cells.Add(Data.CellPole[i, 0]); }
 
                 //Left & DOWN 5 (-,+)
                 iac = minusCell(i, numCellX);
                 jac = plusCell(j, numCellY);
-                if ((iac + jac) >= 0) cells.Add(CellPole[iac, jac]);
+                if ((iac + jac) >= 0) cells.Add(Data.CellPole[iac, jac]);
 
                 //Left 6 (-,0)
-                if (i > 0) { cells.Add(CellPole[i - 1, j]); }
-                else if (endless_pole == true) { cells.Add(CellPole[numCellX - 1, j]); }
+                if (i > 0) { cells.Add(Data.CellPole[i - 1, j]); }
+                else if (endless_pole == true) { cells.Add(Data.CellPole[numCellX - 1, j]); }
 
                 //UP&LEFT 7 (-,-)
                 iac = minusCell(i, numCellX);
                 jac = minusCell(j, numCellY);
-                if ((iac + jac) >= 0) cells.Add(CellPole[iac, jac]);
+                if ((iac + jac) >= 0) cells.Add(Data.CellPole[iac, jac]);
 
                 return cells;
             }
@@ -512,14 +556,14 @@ namespace Jiza
                     {
                         if (currentMen.myFamily.blocks != null)
                         {
-                            x = currentMen.myFamily.blocks.ElementAt(0).Cell.x; // координаты первого семейного блока
-                            y = currentMen.myFamily.blocks.ElementAt(0).Cell.y;
+                            x = currentMen.myFamily.blocks.ElementAt(0).myCell.x; // координаты первого семейного блока
+                            y = currentMen.myFamily.blocks.ElementAt(0).myCell.y;
                             flag_gotoBlock = true;
                         }
                         else if (currentMen.myFamilyByBorn!=null && currentMen.myFamilyByBorn.blocks != null)
                         {
-                            x = currentMen.myFamilyByBorn.blocks.ElementAt(0).Cell.x;
-                            y = currentMen.myFamilyByBorn.blocks.ElementAt(0).Cell.y;
+                            x = currentMen.myFamilyByBorn.blocks.ElementAt(0).myCell.x;
+                            y = currentMen.myFamilyByBorn.blocks.ElementAt(0).myCell.y;
                             flag_gotoBlock = true;
                         }
                         else
@@ -948,12 +992,12 @@ namespace Jiza
                 int x1 = -1, y1 = -1; //координаты ячейки(по умолчанию -1 не попали ни в какую ячейку)
                 for (j = 0; j < numCellY; j++)
                 {
-                    if (CellPole[i, j].y < Y && (CellPole[i, j].y + cellSizeY) > Y)
+                    if (Data.CellPole[i, j].y < Y && (Data.CellPole[i, j].y + cellSizeY) > Y)
                     {
                         y1 = j; //нашли в j - номер строки
                         for (i = 0; i < numCellX; i++)
                         {
-                            if (CellPole[i, j].x < X && (CellPole[i, j].x + cellSizeX) > X)
+                            if (Data.CellPole[i, j].x < X && (Data.CellPole[i, j].x + cellSizeX) > X)
                             { //нашли в i - номер столбца
                                 x1 = i;
                                 break;
@@ -965,7 +1009,7 @@ namespace Jiza
 
                 if (x1 == -1 || y1 == -1)
                     return null; //попаданий в ячейки не было
-                return CellPole[x1, y1]; // возвращаем ячейку с полученной координатой
+                return Data.CellPole[x1, y1]; // возвращаем ячейку с полученной координатой
             }
         }
 
@@ -1154,7 +1198,7 @@ namespace Jiza
             public int force { get; private set; }//текущая сила индивида (можно развить или потерять)
             public int forceBorn { get; private set; } //сила от рождения (типа физических данных)
             public int health { get; private set; }//текущее здоровье индивида
-            protected int healthBorn; //здоровье индивила с рождения
+            public int healthBorn{ get; private set; } //здоровье индивила с рождения
             public int fert { get; private set; }//фертильность индивида кол-во детей которое он может произвести
             protected int fertBorn { get; private set; }//наследственная плодовитость
             public bool withFamily = false; //индикатор того, что человек находиться в контакте с семьей(true)
@@ -1434,20 +1478,27 @@ namespace Jiza
           // все взрослые члены семьи
             public Family myFamily;
             public List<Men> residents;
-            public Cell Cell; //ссылка на клетку местонаходжения блока
+            public Cell myCell; //ссылка на клетку местонаходжения блока
+            public GBlock gblock; // соседние блоки
+            public int healthblock { get; private set; }
+            public int forceblock { get; private set; }
             //питание блока семьи происходит отбором средней величины от 
             //граничных питательных клеток. 
             //При нападении на блок, его здоровью складывается из всех взрослых членов семьи
             //если человек в блоке умер, его место может занять любой из подошедших взрослых
             //членов семьи
             // каждые AgeAdult циклов блок семьи производит врослое потомство 
-            // равное числу членов семьи в блоке, которое помещается за пределы блока 
-            public int health { get; private set; }
+            // равное числу членов семьи в блоке, которое заменяет тех кто в блоке, а старые
+            // жители отправляются за пределы блока 
+
             public Block(Cell currentCell, Family family)
             {
                 int man = 0, woman = 0;
                 myFamily = family;
-                Cell = currentCell;
+                myCell = currentCell;
+                healthblock = 0;
+                forceblock = 0;
+                gblock = null;
                 residents = new List<Men>();
                 foreach (var member in family.members)
                 {
@@ -1466,6 +1517,8 @@ namespace Jiza
                             else continue; // женщина уже поселена в блоке
                         }
                         residents.Add(member);
+                        healthblock += member.healthBorn;
+                        forceblock += member.forceBorn;
                         member.resident_flag = true;
                         OccupyCells.Remove(member.Cell);//освобождаем клетку чела
                         FreeCells.Add(member.Cell);
@@ -1474,37 +1527,49 @@ namespace Jiza
 
                     }
                 }
-
-
-
             }
 
             // во время хода, происходит расчет кол-ва питательных клеток вокруг блока
             // и с помощью 
+           
+
+            public void FeedBlock()
+            {
+
+            }
+            public void BabyBorn() 
+            {
+                // работает, если нет соседних  блоков
+            }
+            public void PaintBlock()
+            {
+
+            }
         }
-        public class Hall //структура состоящая из нескольких блоков.
+        public class GBlock //структура состоящая из нескольких блоков.
         {
             public static int count { get; set; }
 
-            public static List<Hall> blocks { get; set; }
+            public static List<Block> blocks { get; set; }
             //текущая сила ,блока (равна среднему всех челов из которых образован блок)
             public static int force { get; private set; }
             //текущее здоровье блока (равна среднему всех челов из которых образован блок)
             public static int health { get; private set; }
 
-
-            public Hall(Cell currentCell, Family family)
-            {
-                paintHall();
-            }
-            private void paintHall()
+            public GBlock(Block block1, Block block2)
             {
 
             }
+            public void AddBlock(Block newBlock)
+            {
+
+            }
+
         }
 
         private void start_btn_Click(object sender, EventArgs e)
         {
+            if(people.Count==0 && flag_life==false)btnReset_Click(null, null);
             if (pole == null) { init_field(); }
             else if (people.Count > 0 && flag_life == true) {/* timer1.Stop(); */flag_life = false; return; }
             else if (people.Count > 0 && flag_life == false) { timer1.Start(); flag_life = true; return; }
