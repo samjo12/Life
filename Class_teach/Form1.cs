@@ -158,7 +158,9 @@ namespace Jiza
                 "С этого момента, каждые несколько циклов, дом будет взращивать взрослого члена семьи " +
                 "При наличии дома, он становиться местом привлечения всех членов семьи на поле. " +
                 "Обитатели дома  получают питание из клеток вокруг дома и защищяют его." +
-                "Сруктура из 3х3 домов образует хутор, 5х5 - поселок, 7х7-город, 9х9- полис, 11х11-сити",
+                "Сруктура из 9 домов образует хутор(3 ребенка в семье), 25 - поселок, 49-город, 81- полис, 121-сити,"+
+                "169 - мегаполис. На хуторе в каждом доме взращиваются дети, поселок охраняют 5 воинов"+
+                "",
                 "Симуляция Жиза");
         }
         public void init_field()
@@ -509,33 +511,36 @@ namespace Jiza
                 int j = currentCell.j;
                 int iac, jac;
 
-                for (int radius = 1; radius < numCellX / 2; radius++)
+                for (int radius = 1; radius < (numCellX-1) / 2; radius++)
                 {
                     for (int m = i - radius; m < i + radius; m++)
                     {
-                        if (m > 0)
+                        if (m >= 0)
                         {
                             if (m < numCellX) iac = m;
-                            else if (endless_pole == true) iac = m - numCellX; else continue;
+                            else if (endless_pole == true) iac = numCellX - m; else continue;
                         }
-                        else // m < 0
+                        else // (m < 0)
                         {
-                            if (endless_pole == true) iac = m + numCellX; else continue;
+                            if (endless_pole == true) iac = numCellX + m; else continue;
                         }
 
+                        
                         for (int n = j - radius; n < j + radius; n++)
                         {// заполняем список из пустых ячеек
-                            if (n > 0)
+                            if (n >= numCellY || n <= numCellY) continue;
+                            if (n >= 0)
                             {
                                 if (n < numCellY) jac = n;
-                                else if (endless_pole == true) jac = n - numCellY; else continue;
+                                else if (endless_pole == true) jac = numCellY - n; else continue;
                             }
                             else // n < 0
                             {
-                                if (endless_pole == true) jac = n + numCellY; else continue;
+                                if (endless_pole == true) jac = numCellY + n; else continue;
                             }
                             // проверим свободна ли данная ячейка
-                            Cell currCell = Data.CellPole[iac, jac];
+                            Cell currCell;
+                            currCell = Data.CellPole[iac, jac];
 
                             if (currCell.Man == null && currCell.block == null) freecells.Add(currCell);
                         }

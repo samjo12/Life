@@ -61,6 +61,8 @@ namespace Jiza
             this.label13 = new System.Windows.Forms.Label();
             this.nudSpeed = new System.Windows.Forms.NumericUpDown();
             this.btnReset = new System.Windows.Forms.Button();
+            this.tbStatBlocks = new System.Windows.Forms.TextBox();
+            this.label14 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.nudCells)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudPeople)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudSpeed)).BeginInit();
@@ -69,7 +71,7 @@ namespace Jiza
             // individ_count_label
             // 
             this.individ_count_label.AutoSize = true;
-            this.individ_count_label.Location = new System.Drawing.Point(7, 401);
+            this.individ_count_label.Location = new System.Drawing.Point(7, 382);
             this.individ_count_label.Name = "individ_count_label";
             this.individ_count_label.Size = new System.Drawing.Size(71, 15);
             this.individ_count_label.TabIndex = 2;
@@ -78,7 +80,7 @@ namespace Jiza
             // family_count_label
             // 
             this.family_count_label.AutoSize = true;
-            this.family_count_label.Location = new System.Drawing.Point(7, 712);
+            this.family_count_label.Location = new System.Drawing.Point(7, 693);
             this.family_count_label.Name = "family_count_label";
             this.family_count_label.Size = new System.Drawing.Size(46, 15);
             this.family_count_label.TabIndex = 3;
@@ -96,14 +98,14 @@ namespace Jiza
             // 
             // tbStatPeople
             // 
-            this.tbStatPeople.Location = new System.Drawing.Point(7, 418);
+            this.tbStatPeople.Location = new System.Drawing.Point(7, 399);
             this.tbStatPeople.Name = "tbStatPeople";
             this.tbStatPeople.Size = new System.Drawing.Size(88, 23);
             this.tbStatPeople.TabIndex = 5;
             // 
             // tbStatFam
             // 
-            this.tbStatFam.Location = new System.Drawing.Point(7, 730);
+            this.tbStatFam.Location = new System.Drawing.Point(7, 711);
             this.tbStatFam.Name = "tbStatFam";
             this.tbStatFam.Size = new System.Drawing.Size(88, 23);
             this.tbStatFam.TabIndex = 5;
@@ -111,7 +113,7 @@ namespace Jiza
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(7, 535);
+            this.label1.Location = new System.Drawing.Point(7, 516);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(42, 15);
             this.label1.TabIndex = 6;
@@ -183,7 +185,7 @@ namespace Jiza
             // 
             // tbStatInfants
             // 
-            this.tbStatInfants.Location = new System.Drawing.Point(7, 554);
+            this.tbStatInfants.Location = new System.Drawing.Point(7, 535);
             this.tbStatInfants.Name = "tbStatInfants";
             this.tbStatInfants.Size = new System.Drawing.Size(88, 23);
             this.tbStatInfants.TabIndex = 11;
@@ -191,7 +193,7 @@ namespace Jiza
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(7, 580);
+            this.label4.Location = new System.Drawing.Point(7, 561);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(76, 15);
             this.label4.TabIndex = 2;
@@ -199,7 +201,7 @@ namespace Jiza
             // 
             // tbStatTeens
             // 
-            this.tbStatTeens.Location = new System.Drawing.Point(7, 598);
+            this.tbStatTeens.Location = new System.Drawing.Point(7, 579);
             this.tbStatTeens.Name = "tbStatTeens";
             this.tbStatTeens.Size = new System.Drawing.Size(88, 23);
             this.tbStatTeens.TabIndex = 5;
@@ -207,7 +209,7 @@ namespace Jiza
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(7, 624);
+            this.label5.Location = new System.Drawing.Point(7, 605);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(64, 15);
             this.label5.TabIndex = 6;
@@ -215,7 +217,7 @@ namespace Jiza
             // 
             // tbStatAdults
             // 
-            this.tbStatAdults.Location = new System.Drawing.Point(7, 642);
+            this.tbStatAdults.Location = new System.Drawing.Point(7, 623);
             this.tbStatAdults.Name = "tbStatAdults";
             this.tbStatAdults.Size = new System.Drawing.Size(88, 23);
             this.tbStatAdults.TabIndex = 11;
@@ -223,7 +225,7 @@ namespace Jiza
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(7, 668);
+            this.label6.Location = new System.Drawing.Point(7, 649);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(62, 15);
             this.label6.TabIndex = 6;
@@ -231,7 +233,7 @@ namespace Jiza
             // 
             // tbStatOldMans
             // 
-            this.tbStatOldMans.Location = new System.Drawing.Point(7, 686);
+            this.tbStatOldMans.Location = new System.Drawing.Point(7, 667);
             this.tbStatOldMans.Name = "tbStatOldMans";
             this.tbStatOldMans.Size = new System.Drawing.Size(88, 23);
             this.tbStatOldMans.TabIndex = 11;
@@ -287,7 +289,7 @@ namespace Jiza
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(12, 356);
+            this.label10.Location = new System.Drawing.Point(12, 337);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(58, 15);
             this.label10.TabIndex = 13;
@@ -296,7 +298,7 @@ namespace Jiza
             // tbStatMoves
             // 
             this.tbStatMoves.BackColor = System.Drawing.SystemColors.InactiveCaption;
-            this.tbStatMoves.Location = new System.Drawing.Point(7, 375);
+            this.tbStatMoves.Location = new System.Drawing.Point(7, 356);
             this.tbStatMoves.Name = "tbStatMoves";
             this.tbStatMoves.Size = new System.Drawing.Size(88, 23);
             this.tbStatMoves.TabIndex = 14;
@@ -304,7 +306,7 @@ namespace Jiza
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(7, 444);
+            this.label11.Location = new System.Drawing.Point(7, 425);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(54, 15);
             this.label11.TabIndex = 15;
@@ -312,7 +314,7 @@ namespace Jiza
             // 
             // tbStatMales
             // 
-            this.tbStatMales.Location = new System.Drawing.Point(7, 462);
+            this.tbStatMales.Location = new System.Drawing.Point(7, 443);
             this.tbStatMales.Name = "tbStatMales";
             this.tbStatMales.Size = new System.Drawing.Size(88, 23);
             this.tbStatMales.TabIndex = 16;
@@ -320,7 +322,7 @@ namespace Jiza
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(7, 488);
+            this.label12.Location = new System.Drawing.Point(7, 469);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(56, 15);
             this.label12.TabIndex = 17;
@@ -328,7 +330,7 @@ namespace Jiza
             // 
             // tbStatFemales
             // 
-            this.tbStatFemales.Location = new System.Drawing.Point(7, 507);
+            this.tbStatFemales.Location = new System.Drawing.Point(7, 488);
             this.tbStatFemales.Name = "tbStatFemales";
             this.tbStatFemales.Size = new System.Drawing.Size(88, 23);
             this.tbStatFemales.TabIndex = 18;
@@ -376,12 +378,30 @@ namespace Jiza
             this.btnReset.UseVisualStyleBackColor = true;
             this.btnReset.Click += new System.EventHandler(this.btnReset_Click);
             // 
+            // tbStatBlocks
+            // 
+            this.tbStatBlocks.Location = new System.Drawing.Point(7, 755);
+            this.tbStatBlocks.Name = "tbStatBlocks";
+            this.tbStatBlocks.Size = new System.Drawing.Size(88, 23);
+            this.tbStatBlocks.TabIndex = 23;
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(7, 737);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(47, 15);
+            this.label14.TabIndex = 22;
+            this.label14.Text = "Домов:";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(1904, 1041);
+            this.Controls.Add(this.tbStatBlocks);
+            this.Controls.Add(this.label14);
             this.Controls.Add(this.btnReset);
             this.Controls.Add(this.nudSpeed);
             this.Controls.Add(this.label13);
@@ -419,7 +439,7 @@ namespace Jiza
             this.Name = "Form1";
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.WindowsDefaultBounds;
-            this.Text = "Жиза v0.61 beta by Samjo";
+            this.Text = "Жиза v0.64 beta by Samjo";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseDown);
             ((System.ComponentModel.ISupportInitialize)(this.nudCells)).EndInit();
@@ -464,6 +484,8 @@ namespace Jiza
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.NumericUpDown nudSpeed;
         private System.Windows.Forms.Button btnReset;
+        private System.Windows.Forms.TextBox tbStatBlocks;
+        private System.Windows.Forms.Label label14;
     }
 }
 
