@@ -27,6 +27,7 @@ namespace Jiza
         public static int currentDead; //текущий номер в массиве ManMoves
  //       public static Men[] ManMoves; //массив для обхода людей
         public static List<Men> people = new List<Men>(); // список всех живых людей
+        public static List<Men> peopleBlocks = new List<Men>(); // список людей живущих в домах
         public static List<Men> deadMens = new List<Men>(); // список покойников, обновляется каждый ход
         public static List<Men> newBorns = new List<Men>(); // список новорожденных
 
@@ -36,6 +37,7 @@ namespace Jiza
         public static List<Cell> FreeCells = new List<Cell>(); // Список пустых клеток
         public static List<Cell> OccupyCells = new List<Cell>();//Список занятых клеток
         public static List<Block> BlockCells = new List<Block>(); //список клеток занятых блоками
+        public static List<Block> BrokenBlocks = new List<Block>(); //список клеток занятых блоками
         public static List<Block> newBlockCells = new List<Block>(); //список клеток со строящимися блоками
 
         public static int panel_width = 100; // ширина информ-панели слева экрана
@@ -63,6 +65,7 @@ namespace Jiza
         public static int statBattles = 0;
         public static int statKills = 0;
         public static int statDeath = 0;
+        public static int statBlocks=0;
 
         // КОНСТАНТЫ
         public static bool endless_pole = true; //бесконечное поле
@@ -236,7 +239,12 @@ namespace Jiza
                 //поедим
                 // размножимся
                 item.NewbornInBlock();
+                item.isStrongBlock();
+
             }
+            foreach (var item in BrokenBlocks)
+                BlockCells.Remove(item);
+            BrokenBlocks.Clear();
 
             // Переберем всех людей - каждый делает ход
             foreach(var person in people)
@@ -269,7 +277,7 @@ namespace Jiza
             {
                 statPeople = 0;
                 statMoves = 0;
-                statPeople = 0;
+                statBlocks = 0;
                 statMales = 0;
                 statFemales = 0;
                 statAgeInfants = 0;
@@ -294,6 +302,7 @@ namespace Jiza
             tbStatBattles.Text = Convert.ToString(statBattles);
             tbStatDeath.Text = Convert.ToString(statDeath);
             tbStatKills.Text = Convert.ToString(statKills);
+            tbStatBlocks.Text = Convert.ToString(statBlocks);
 
         }
         public static class Data 
@@ -336,7 +345,7 @@ namespace Jiza
             {
                 Cell newCell;
                 Cell oldCell = person.Cell;
-                if (oldCell == null) return;
+
 
                 if (person.age >= MAX_AGE)  // умер по возрасту
                 { person.deadMan(); oldCell.setFreeCell(); return; }
@@ -363,19 +372,7 @@ namespace Jiza
                 }
             }
 
-          /*  public void setFreeCell(Cell oldCell)
-            {
-                OccupyCells.Remove(oldCell);
-                FreeCells.Add(oldCell);
-                oldCell.Man = null;
-                
-            }*/
-
-            // Функция без параметров возвращает случайную пустую ячейку
-            // Функция с параметром centerCell возвращает ближайшую к ней пустую ячейку с наибольшим параметром food
-            // Функция с двумя параметрами ищет ближайшую ячейку с food>= needfood
-            // Возвращает свободную ячейку удовлетворяющую требованиям, либо null
-           
+          
             public Cell findMaxFood(List<Cell> cells) //возвращает ячейку из списка cells с наибольшим значением food
             {
                 if (cells == null || cells.Count == 0) return null;
@@ -448,52 +445,20 @@ namespace Jiza
 
                 return cells;
             }
-            /* public List<Cell> GetFreeCellsWithFamily(Cell currentCell, Family myFamily)
-             {
-                 List<Cell> aroundCells;// = new List<Cell>();
-                 List<Cell> freeCells = new List<Cell>();
-                 aroundCells = getCellsAroundMe(currentCell);
-                 foreach (var cell in aroundCells)// находим все свободные ячейки и считаем сколько в них еды
-                 {
-                     if (cell.block == null && cell.Man == null) { freeCells.Add(cell); }
-                     else if (cell.Man != null && cell.Man.myFamily != null && cell.Man.myFamily == myFamily)
-                     { freeCells.AddRange(GetFreeCellsWithFamily(cell, myFamily)); }
-
-                 }
-                 freeCells.Distinct();//удалим дубликаты;
-                 return freeCells;
-             }
-             public void mealBlock(Block block)
-             {
-                 // работает, если нет соседних  блоков
-                 List<Cell> freeCells = new List<Cell>();
-                 int foodInFreeCells = 0;
-
-                 freeCells.AddRange(GetFreeCellsWithFamily(block.myCell, block.myFamily));
-                 freeCells.Distinct();//удалим дубликаты;
-                 int N = freeCells.Count;
-                 int sub = DEC_CELL_FOOD * block.residents.Count / N;
-                 if (sub < foodInFreeCells)
-                     foreach (var cell in freeCells)
-                     {
-                         if (cell.food > sub) { cell.food -= sub; foodInFreeCells -= sub; }
-                         else
-                         {
-                             foodInFreeCells -= cell.food; cell.food = 0;
-                             if (N > 0) N--; sub = DEC_CELL_FOOD * block.residents.Count / N;
-                         }
-
-                     }
-             }*/
+          
             public Cell getRandFreeCell() //centerCell - ячейка рядом с которой ищется свободная ячейка
             {  // отбираем все свободные ячейки и случайно возвращаем любую из них,
                 // или если все заняты - возвращаем null
                 int free_cells_counter = FreeCells.Count;
+                Cell freecell;
                 if (free_cells_counter == 0) return null;
-
-                int c = rand1.Next(0, free_cells_counter);
-                Cell freecell = FreeCells.ElementAt(c);
-                if(freecell!=null)freecell.setOccupyCell();
+                do
+                {
+                    int c = rand1.Next(0, free_cells_counter);
+                    freecell = FreeCells.ElementAt(c);
+                }while (freecell != null && freecell.block != null);
+                    
+                freecell.setOccupyCell();
 
                 return freecell;
             }
@@ -502,8 +467,6 @@ namespace Jiza
                 // или если все заняты - возвращаем null
                 int free_cells_counter = FreeCells.Count;
                 if (free_cells_counter == 0) return null;
-                Cell freecell = null;
-                List<Cell> freecells = new List<Cell>();
 
                 //будем искать свободную ячейку по границе расходящихся кругов вокруг центральной ячейки
                 
@@ -539,38 +502,23 @@ namespace Jiza
                                 if (endless_pole == true) jac = numCellY + n; else continue;
                             }
                             // проверим свободна ли данная ячейка
-                            Cell currCell;
-                            currCell = Data.CellPole[iac, jac];
+                            Cell currCell=Data.CellPole[iac, jac];
 
-                            if (currCell.Man == null && currCell.block == null) freecells.Add(currCell);
+                            if (currCell.Man == null && currCell.block == null) 
+                            { 
+                                if (needfood != 0)
+                                {
+                                    if (currCell.food >= needfood) { return currCell; } // ячейка найдена на текущем радиусе поиска
+                                }
+                            }
                         }
                     }
-                    // здесь мы уже прошли по радиусу вокруг centerCell
-                    // если нужные ячейки найдены выйдем из цикла, иначе расширим радиус поиска
-                    freecells.Distinct(); // уберем дубли
 
-                    if (needfood != 0)
-                    {
-                        foreach (var cell in freecells)
-                            if (cell.food >= needfood) { freecell = cell; break; } // ячейка найдена на текущем радиусе поиска
-                    }
-                    else
-                    {
-                        freecell = findMaxFood(freecells); break;
-                    }
                 }
 
-                return freecell;
+                return null;
             }
-            /*         public int SumFoodAround(List<Cell> cells) // возвращает сумму всей еды 
-                     {
-                         int sum=0;
-                         foreach(var cell in cells)
-                         {
-                             sum += cell.food;
-                         }
-                         return sum;
-                     }*/
+
             public Cell goToMyFamily(Cell currentCell, List<Cell> MaxFood, List<Cell> SomeFood, List<Cell> Moves, List<Men> NonFamily)
             {   //for closer position to family member
                 //нужно сдвинуться в направлении члена семьи с флагом withFamily так, чтобы у новой ячейки,
@@ -741,20 +689,6 @@ namespace Jiza
                 {
                     if (cell.Man != null) //соседняя ячейка занята человеком
                     {
-                        if (!currentMan.relatives.Contains(cell.Man))
-                        { //нашли рядом НЕродственника
-                            AC_NonFamily.Add(cell.Man);
-                            if (currentMan.isAdult())//свой возраст adult?
-                                if (cell.Man.isAdult()) //проверка возраста 
-                                {                          //соседа если от Adult до OLDMAN
-                                    if (cell.Man.myFamily == null)//встретили несемейного
-                                    { // без своей семьи
-                                        if (cell.Man.sex != currentMan.sex) //он еще и оказался свободным партнером
-                                            AC_SinglePartners.Add(cell.Man); // противоположного пола
-                                    }
-                                }
-                        }
-
                         //если текущий чел из нашей семьи, 
                         if (currentMan.myFamily != null && currentMan.myFamily == cell.Man.myFamily)
                         {
@@ -774,6 +708,32 @@ namespace Jiza
                             }
 
                         }
+                        else if (currentMan.myFamilyByBorn != null && currentMan.myFamilyByBorn != cell.Man.myFamily)  // проверим не является ли он двоюродным родственником
+                        {
+                            //нашли рядом НЕродственника
+                            AC_NonFamily.Add(cell.Man);
+                            if (currentMan.isAdult())//свой возраст adult?
+                                if (cell.Man.isAdult()) //проверка возраста 
+                                {                          //соседа если от Adult до OLDMAN
+                                    if (cell.Man.myFamily == null)//встретили несемейного
+                                    { // без своей семьи
+                                        if (cell.Man.sex != currentMan.sex) //он еще и оказался свободным партнером
+                                            AC_SinglePartners.Add(cell.Man); // противоположного пола
+                                    }
+                                }
+                        }
+                        else//дальний родственник
+                        {
+                            if (currentMan.isAdult())//свой возраст adult?
+                                if (cell.Man.isAdult()) //проверка возраста 
+                                {                          //соседа если от Adult до OLDMAN
+                                    if (cell.Man.myFamily == null)//встретили несемейного
+                                    { // без своей семьи
+                                        if (cell.Man.sex != currentMan.sex) //он еще и оказался свободным партнером
+                                            AC_SinglePartners.Add(cell.Man); // противоположного пола
+                                    }
+                                }
+                        } 
 
                     }
                     else // в клетке не человек
@@ -837,7 +797,7 @@ namespace Jiza
                 // если есть, то получаем 
                 if (currentMan.myFamily != null) //если человек семейный
                 {
-                    if (AC_Family.Count + AC_Family_Blocks.Count == 8 &&
+                    if (AC_Family.Count + AC_Family_Blocks.Count == 6 &&
                         currentCell.Man != null &&
                         currentCell.Man.myFamily != null &&
                         currentCell.Man.myFamily.numAdultMembers >= 2)//чел окружен членами семьи и/или их домами
@@ -1182,7 +1142,8 @@ namespace Jiza
             public List<Men> membersByBorn { get; protected set; } // список членов семьи по рождению
             public List<Block> blocks { get; set; }
 
-            public int numAdultMembers;
+            public int numAdultMembers; // количество взрослых бездомных
+            public int numAdultResidents; // количество взрослых проживающих в блоках
 
             public Family(Men Rod1, Men Rod2) //создаем новую семью, нужно минимум 2 взрослых члена
             { // Если мужчина имеет семью, то новая семья не создается, а женщина берет его фамилию
@@ -1194,6 +1155,7 @@ namespace Jiza
                 if (Rod1 != null) if (!members.Contains(Rod1)) members.Add(Rod1); //проверка при добавлении
                 if (Rod2 != null) if (!members.Contains(Rod2)) members.Add(Rod2);// на случай неполной семьи
                 numAdultMembers = 2;
+                numAdultResidents = 0;
                 //выберем цвет семьи
                 R = Rod1.R ^ Rod2.R;
                 B = Rod1.B ^ Rod2.B;
@@ -1244,7 +1206,7 @@ namespace Jiza
 
             public bool flag_resident { get; set; } // проживает в блоке?
             public Family myFamilyByBorn { get; set; }
-            public List<Men> relatives { get; set; }
+            //public List<Men> relatives { get; set; }
             public int age { get; protected set; } // возраст
             public int Age { get { return age; } set { age = value; } }
             private Cell myCell; //ссылка на клетку своего местонаходжения
@@ -1267,10 +1229,13 @@ namespace Jiza
             public bool withFamily = false; //индикатор того, что человек находиться в контакте с семьей(true)
             public Men(Cell cell, Family family = null, Block block=null)
             {
+                if (cell == null)
+                { cell= null; }
                 myFamily = family; //служит для принятия в семью 3-го и далее взрослого партнера
                 flag_resident = false;
+                
 
-                relatives = new List<Men>(); //создаем список родственников
+                //relatives = new List<Men>(); //создаем список родственников
                 myCell = cell;
                 if (family == null) // появился взрослый чел со старта или кликом
                 {
@@ -1284,6 +1249,7 @@ namespace Jiza
                 else //ребенок родился в семье
                 {
                     myFamilyByBorn = family; //семья по рождению
+                    myFamilyByBorn.members.Add(this); // добавим в семью новорожденного
                     age = 0;
                     sex = Convert.ToBoolean(rand1.Next(0, 2));
                     if (sex == MALE) statMales++;
@@ -1304,7 +1270,7 @@ namespace Jiza
                             health += m.health;
                             fert += m.fert;
                         }
-                        relatives.Add(m); //создаем список родственников из всех членов семьи
+
                     }
 
                     forceBorn = (int)((force / AdultMembers) * (1 + rand1.Next(-1, 2) / 10)); //+- 10% от среднего 
@@ -1453,20 +1419,20 @@ namespace Jiza
 
             public void deadMan()
             {
-                if (relatives != null && relatives.Count > 0) //удаляем покойного из списка родни всех его родственников
-                    foreach (var r in relatives)
-                        if (r.relatives != null) r.relatives.Remove(this);
+              //  if (relatives != null && relatives.Count > 0) //удаляем покойного из списка родни всех его родственников
+              //      foreach (var r in relatives)
+               //         if (r.relatives != null) r.relatives.Remove(this);
                 if (myFamily != null) //удаляем покойного из членов семьи к которой он принадлежал
                     myFamily.RemoveFromFamily(this);
                 // удаляем все данные по покойному из его экземпляра класса Men
                 myCell = null;
                 myFamily = null;
                 myFamilyByBorn = null;
-                if (relatives != null)
-                {
-                    relatives.Clear();
-                    relatives = null;
-                }
+              //  if (relatives != null)
+              //  {
+              //      relatives.Clear();
+              //      relatives = null;
+              //  }
                 statPeople--;
                 Stat(age);
                 deadMens.Add(this);
@@ -1546,22 +1512,56 @@ namespace Jiza
             public bool Battle(Men opp)
             {
                 bool result;
+                int afterBattleHealth;
                 int deltaForce = force - opp.force;
-                int modDeltaForce = deltaForce > 0 ? deltaForce : deltaForce * (-1);
-                health += deltaForce;
-                opp.health -= modDeltaForce;
 
-                if (deltaForce > 0)
+                if (deltaForce >= 0) //у меня больше силы или одинаково с противником
                 {
-                    myCell.grab(opp.myCell);//ПЕРЕНОШУ ЕДУ ПРОТИВНИКА В свою КЛЕТКУ
-                    //opp.myCell.grab(myCell);//ПЕРЕНОШУ СВОЮ ЕДУ В КЛЕТКУ ПРОТИВНИКА
-                    result = true; // я остался жив
+                    afterBattleHealth = health - deltaForce;
+                    if (afterBattleHealth > 0)//моя победа, здоровья хватает
+                    {
+                        health = afterBattleHealth;
+                        opp.health = 0;
+                        result = true;
+                    }
+                    else //я проиграл. здоровья не хватило
+                    {
+                        opp.health -= deltaForce;
+                        opp.force += (int)(deltaForce / 2);  //сила выросла
+                        health = 0;
+                        result = false;
+                    }
                 }
-                else //сила противника была выше, если я выживу , то стану сильнее
+                else // у меня  меньше силы
+                { 
+                    afterBattleHealth = health + deltaForce-opp.health;
+                    if (afterBattleHealth > 0)//моя победа, здоровья хватает
+                    { 
+                        force += (-deltaForce / 2);  //сила выросла
+                        health = afterBattleHealth;
+                        opp.health = 0;
+                        result = true;
+                    }
+                    else //я проиграл. здоровья не хватило
+                    {
+                        health = 0;
+                        opp.health = -afterBattleHealth;
+                        result = false;
+                    }
+                }
+
+
+                if (result==true) //у нас больше сил чем у противника, но достаточно ли здоровья
                 {
-                    force += (int)(modDeltaForce / 2); //сила выросла
+                    if (opp.myCell == null)
+                    { return false; }
+                    myCell.grab(opp.myCell);//ПЕРЕНОШУ ЕДУ ПРОТИВНИКА В свою КЛЕТКУ
+                }
+                else // противник победил. сила/здоровье противника были выше
+                {
+                    if (opp.myCell == null)
+                    { return false; }
                     opp.myCell.grab(myCell); //противник забрал мои ресурсы
-                    //myCell.grab(opp.myCell); // противник перенес свои ресурсы на мою клетку 
                     result = false;
                 }
                 return result;
@@ -1570,6 +1570,8 @@ namespace Jiza
             public void becomeResidentBlock(Block myBlock)
             {
                 flag_resident = true;
+                myBlock.myFamily.numAdultMembers--;
+                myBlock.myFamily.numAdultResidents++;
                 myCell.setFreeCell();
                 myCell = myBlock.myCell;
             }
@@ -1577,11 +1579,15 @@ namespace Jiza
             public bool quitResidentBlock() // выходим из блока вовне. возвращает true в случае успеха
             {
                 Cell newCell;
-                newCell = pole.getNearFreeCell(myCell, isMeal());
+                // newCell = pole.getNearFreeCell(myCell, isMeal());
+                newCell = pole.getRandFreeCell();
                 if (newCell == null) return false; // выйти по неудаче
                 Cell = newCell;
                 Cell.Man = this;
-                flag_resident = false;
+                flag_resident = false;                
+                this.myFamily.numAdultResidents--;
+                this.myFamily.numAdultMembers++;
+
                 return true;
             }
         } // end for class Men
@@ -1611,11 +1617,11 @@ namespace Jiza
             public Block(Cell currentCell)
             {
                 //if (currentCell == null) return;
-  //создать блок не получиться
+                //создать блок не получиться
                 ageRange = AgeAdult;
                 myFamily = currentCell.Man.myFamily;
                 myCell = currentCell;
-                
+
                 myCell.block = this;
                 healthblock = currentCell.Man.healthBorn;
                 forceblock = currentCell.Man.forceBorn;
@@ -1629,9 +1635,9 @@ namespace Jiza
 
                 foreach (var member in myFamily.members)
                 {
-                    if (member.isAdult() && member.sex==ssex)
+                    if (member.isAdult() && member.sex == ssex)
                     {
-                        
+
                         healthblock += member.healthBorn;
                         forceblock += member.forceBorn;
                         men2 = member; member.becomeResidentBlock(this); // переселяем его в блок
@@ -1640,6 +1646,7 @@ namespace Jiza
                     }
                 }
                 myFamily.AddToFamily(this); //добавляем блок в базу
+                statBlocks++;
 
             }
 
@@ -1676,9 +1683,21 @@ namespace Jiza
             {
                 // вернем требуемое кол-во еды
                 int decFood; // это требуемое питание из расчета на одного человека
-                decFood = DEC_CELL_FOOD * 12 / 10; 
+                decFood = DEC_CELL_FOOD * 12 / 10;
 
-                return decFood*2;
+                return decFood * 2;
+            }
+            public void isStrongBlock()
+            {
+                if (men1==null || men2==null || !men1.isAdult() || !men2.isAdult())
+                {
+                    if(men1.quitResidentBlock() && men2.quitResidentBlock()) removeBlock();
+                }
+            }
+            public void removeBlock()
+            {
+                BrokenBlocks.Add(this);
+                myFamily.blocks.Remove(this);
             }
             public void FeedBlock()
             {
